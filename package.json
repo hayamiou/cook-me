@@ -12,7 +12,8 @@
     "typecheck": "turbo run typecheck",
     "build": "turbo run build",
     "test": "turbo run test",
-    "dev": "pnpm --filter='@cook-me/*' --parallel dev"
+    "devAll": "pnpm --filter='@cook-me/*' --parallel dev",
+    "dev": "pnpm --filter='@cook-me/api' dev"
   },
   "packageManager": "pnpm@10.22.0",
   "pnpm": {
