@@ -1,9 +1,11 @@
+version: "3.9"
 
 services:
   api:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./apps/api/Dockerfile
+    image: cook-me-api:latest   # image locale pour éviter le pull
     container_name: api
     ports:
       - "3001:3001"
@@ -14,9 +16,12 @@ services:
     depends_on:
       - mongo
       - redis
+    volumes:
+      - .:/app        # montage du code pour hot-reload
+      - /app/node_modules   # éviter d’écraser node_modules installés dans le conteneur
 
   mongo:
-    image: mongo:7
+    image: mongo:7.0       # version fixe et stable
     container_name: mongo
     restart: always
     ports:
