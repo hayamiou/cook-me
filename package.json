@@ -13,14 +13,20 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "devAll": "pnpm --filter='@cook-me/*' --parallel dev",
-    "dev": "concurrently -k \"pnpm dev:docker\" \"pnpm dev:mobile\"",
+    "dev": "concurrently \"pnpm dev:docker\" \"pnpm dev:mobile\"",
     "dev:docker": "docker compose up",
     "dev:docker:build": "docker compose up --build",
     "dev:mobile": "pnpm --filter mobile dev"
   },
   "packageManager": "pnpm@10.22.0",
   "pnpm": {
-    "overrides": {}
+    "overrides": {},
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@swc/core",
+      "esbuild",
+      "sharp"
+    ]
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.6",
