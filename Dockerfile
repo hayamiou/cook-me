@@ -1,28 +1,13 @@
-# Base Node
-FROM node:20-bullseye
+FROM node:24.11.1-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-# Installer pnpm globalement
-RUN npm install -g pnpm
-
-# Créer le répertoire de travail
+FROM base AS build
+COPY . /app
 WORKDIR /app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# Copier uniquement les fichiers nécessaires pour installer les dépendances
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/api/package.json apps/api/
-COPY packages/shared-utils/package.json packages/shared-utils/
+FROM build AS dev
 
-# Installer les dépendances pour l'API uniquement
-RUN pnpm install --filter api...
-
-# Copier le reste du projet
-COPY . .
-
-# Se placer dans le dossier API
-WORKDIR /app/apps/api
-
-# Exposer le port de l'API
-EXPOSE 3001
-
-# Commande pour le développement
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "--filter=@cook-me/api", "dev"] 

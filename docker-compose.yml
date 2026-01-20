@@ -17,6 +17,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - /app/apps/api/node_modules
 
   mongo:
     image: mongo:7.0
