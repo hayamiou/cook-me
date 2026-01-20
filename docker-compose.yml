@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     image: cook-me-api:latest
     container_name: api
+    env_file:
+      - .env
     ports:
       - "3001:3001"
     environment:
