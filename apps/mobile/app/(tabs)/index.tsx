@@ -1,32 +1,49 @@
-import { StyleSheet } from 'react-native'
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Text } from '@/components/ui/text';
+import { View } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo'
-import { Text, View } from '@/components/Themed'
 
 export default function TabOneScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <Text>Cook-Me, l'app olé olé pour rencontrer les célibataires de ton Lidl</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
-  )
+    return (
+        <View>
+            <Card className="w-full max-w-sm">
+                <CardHeader className="flex-row">
+                    <View className="flex-1 gap-1.5">
+                        <CardTitle>Inscription (+18)</CardTitle>
+                        <CardDescription>Enter your details</CardDescription>
+                    </View>
+                </CardHeader>
+                <CardContent>
+                    <View className="w-full justify-center gap-4">
+                        <View className="gap-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" placeholder="m@example.com" />
+                        </View>
+                        <View className="gap-2">
+                            <Label htmlFor="name">password</Label>
+                            <Input id="name" placeholder="banana123" />
+                        </View>
+                    </View>
+                </CardContent>
+                <CardFooter className="flex-col gap-2">
+                    <Button className="w-full">
+                        <Text>Login</Text>
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                        <Text>Later</Text>
+                    </Button>
+                </CardFooter>
+            </Card>
+        </View>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-})
