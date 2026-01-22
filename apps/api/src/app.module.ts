@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common'
+import { MongooseModule } from '@nestjs/mongoose'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { MongooseModule } from '@nestjs/mongoose'
 
 @Module({
-  imports: [
-    MongooseModule.forRoot(process.env['MONGODB_URI']!),
-  ],
+  imports: [MongooseModule.forRoot('mongodb://mongo:27017/CMDB')],
   controllers: [AppController],
   providers: [AppService],
 })
