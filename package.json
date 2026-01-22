@@ -9,6 +9,7 @@
     "preinstall": "npx only-allow pnpm",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
+    "lint:staged": "lint-staged",
     "typecheck": "turbo run typecheck",
     "build": "turbo run build",
     "test": "turbo run test",
@@ -16,22 +17,26 @@
     "dev": "concurrently \"pnpm dev:docker\" \"pnpm dev:mobile\"",
     "dev:docker": "docker compose up",
     "dev:docker:build": "docker compose up --build",
-    "dev:mobile": "pnpm --filter mobile dev"
+    "dev:mobile": "pnpm --filter mobile dev",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": ["biome check --write"],
+    "**/*.{json,css,md}": ["biome check --write"]
   },
   "packageManager": "pnpm@10.22.0",
   "pnpm": {
     "overrides": {},
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "@swc/core",
-      "esbuild",
-      "sharp"
-    ]
+    "onlyBuiltDependencies": ["@nestjs/core", "@swc/core", "esbuild", "sharp"]
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.6",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "@cook-me/tsconfig": "workspace:^",
     "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "turbo": "^2.6.1",
     "typescript": "^5.9.3"
   },
