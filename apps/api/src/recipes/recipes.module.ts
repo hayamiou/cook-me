@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
-import { RecipesController } from './recipes.controller'
 import { Recipe, RecipeSchema } from './recipes.schema'
+import { RecipesController } from './recipes.controller'
 import { RecipesService } from './recipes.service'
 
 @Module({

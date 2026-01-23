@@ -4,6 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
+    "nest": "nest",
     "build": "nest build",
     "start": "nest start",
     "dev": "nest build --webpack --webpackPath webpack-hmr.config.js --watch",
@@ -21,6 +22,7 @@
     "@nestjs/platform-express": "^11.1.9",
     "mongoose": "^8.20.0",
     "nats": "^2.29.3",
+    "nestjs-zod": "^5.1.1",
     "reflect-metadata": "^0.2.2",
     "run-script-webpack-plugin": "^0.2.3"
   },
