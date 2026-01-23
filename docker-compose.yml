@@ -3,13 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: cook-me-api:latest
+      target: dev
     container_name: api
     env_file:
       - .env
     ports:
       - "3001:3001"
     environment:
+      # PNPM_HOME: /pnpm
       MONGODB_URI: mongodb://mongo:27017/CMDB
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -20,6 +21,10 @@ services:
       - .:/app
       - /app/node_modules
       - /app/apps/api/node_modules
+      - /app/apps/mobile/node_modules
+      - /app/packages/shared-utils/node_modules
+      - /app/packages/tsconfig/node_modules
+      - pnpm-store:/pnpm/store
 
   mongo:
     image: mongo:7.0
@@ -38,4 +43,5 @@ services:
       - "6379:6379"
 
 volumes:
-  mongo-data:
+   pnpm-store:
+   mongo-data:

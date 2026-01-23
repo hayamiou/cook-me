@@ -11,6 +11,8 @@
       "path": "./apps/web"
     }
   ],
-  "compilerOptions": {},
+  "compilerOptions": {
+    "strict": true
+  },
   "extends": "expo/tsconfig.base"
 }
