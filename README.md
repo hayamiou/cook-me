@@ -1,99 +1,160 @@
-# Cook-Me
+# 🍳 Cook-Me
 
+> **Cook-Me** est un projet fullstack en **monorepo** combinant :
+> - une **API backend** (NestJS, Docker)
+> - une **application mobile** (Expo / React Native)
+> - des **packages partagés**
+>
+> L’objectif est de proposer une base **stable, maintenable et pédagogique**, adaptée à un **travail en équipe sur plusieurs semaines**.
 
-## Structure
+---
 
-```
-apps => application that can be started
-packages => shared packages
-```
+## 🗂️ Structure du projet
 
-Every package or app must have a `package.json` file describing dependencies, naming of the package should be `@cook-me/package-name` (change my-project by what you want but keep consistency).
-
-## Setup
-
-1. Install the IDE extension Biome (for linting) 
-2. Install pnpm (from website curl, if you want pnpm to automaticaly manage node version, which is recommended, avoid npm, corepack or packaga manager => https://pnpm.io/installation)
-3. Install dependencies: `pnpm i`
-
-For linting, you can replace biome with packages/eslint you will find an exemple in the `legacy` git branch.
-
-## Develop
-
-### Run the project 
-
-```
-pnpm dev
-```
-
-all apps will be launched in parallel.
-
-### Run Expo only
-
-in /apps/mobile
-```
-pnpm dev
+```text
+cook-me/
+├─ apps/
+│  ├─ api/          → API NestJS (Dockerisée)
+│  └─ mobile/       → Application mobile Expo
+│
+├─ packages/
+│  ├─ shared-utils/ → Fonctions partagées
+│  └─ tsconfig/     → Configuration TypeScript commune
+│
+├─ docker-compose.yml
+├─ Makefile
+├─ package.json
+├─ pnpm-lock.yaml
+└─ README.md
 ```
 
-### Run Nest only
+### Convention de nommage
 
-in /apps/api
-```
-pnpm dev
+Tous les packages du workspace suivent la convention :
+
+```text
+@cook-me/<package-name>
 ```
 
-### Build the project
+---
 
+## ⚙️ Prérequis
+
+- **Node.js ≥ 20**
+- **pnpm**
+- **Docker**
+- **docker-compose**
+- (Recommandé) **WSL / Linux** pour les environnements Windows
+
+---
+
+## ⚠️ Docker & BuildKit (important)
+
+Le `Dockerfile` de l’API utilise des fonctionnalités **Docker BuildKit** :
+
+```dockerfile
+RUN --mount=type=cache ...
 ```
+
+👉 **BuildKit est obligatoire** pour builder l’image.
+
+Toutes les commandes via le **Makefile** activent BuildKit automatiquement.
+
+---
+
+## 🧰 Setup initial
+
+```bash
+pnpm install
+```
+
+### IDE
+- Installer l’extension **Biome**
+- Biome remplace ESLint + Prettier
+
+---
+
+## 🚀 Démarrage rapide (workflow recommandé)
+
+### 🖥️ Terminal 1 — Backend
+
+```bash
+make up
+```
+
+Mode détaché :
+
+```bash
+make up-d
+```
+
+Arrêter :
+
+```bash
+make down
+```
+
+---
+
+### 📱 Terminal 2 — Mobile (Expo)
+
+```bash
+make mobile
+```
+
+Tunnel :
+
+```bash
+make tunnel
+```
+
+---
+
+## 🧪 Scripts
+
+```bash
 pnpm build
-```
-
-### Test the project
-
-```
 pnpm test
-```
-
-or 
-
-```
-pnpm test:watch
-```
-
-### Lint and format the project
-
-```
 pnpm lint
-```
-
-or to fix issues:
-
-```
 pnpm lint:fix
 ```
 
-## Technical informations
+---
+
+## 🧩 Commandes Makefile
+
+```bash
+make build
+make up
+make up-d
+make down
+make logs
+make ps
+make clean
+```
+
+---
+
+## 🧠 Choix techniques
 
 ### Turborepo
+- Exécution parallèle
+- Cache intelligent
 
-Turborepo is used to run scripts in parallel and cache results.
-It is fundamentaly not a requirement since `pnpm run -R ` can also do that.
-
-### Typescript
-
-The challenge of a monorepo is to make packages shareable, usualy we do that by compiling packages prior to using them within the apps.
-
-It may cause issues with live-reloads, since the dependency packages will need to be recompiled first when a package is updated, and the apps will need to know that and rebuild too.
-Also if one app is ESM and the other is CommonJS, it will cause issues, and will need a "double" compilation of the package.
-Precompiling package also means dependency can have trouble being tree-shaken.
-
-The approach here is to use :
-* webpack on NestJS, compiling everything and using `node-externals` for exclusions (like node_modules) except for the packages starting by our prefix `@cook-me`
-* transpilePackages on NextJS, to compile the packages starting by our prefix `@cook-me`
-
-This way, the apps themselves use the package sources directly without the need to be precompiled first.
+### TypeScript
+- Approche **source-first**
+- Pas de pré-build des packages
 
 ### Biome
+- Lint + format rapides
+- Configuration centralisée
 
-Biome is used for linting and formatting. Faster than eslint, but less available rules, also handle formatting (instead of prettier).
+---
 
+## 📌 Résumé
+
+✔️ Projet stable  
+✔️ Prêt pour le travail en équipe  
+✔️ Workflow clair et reproductible
+
+Happy coding 👩‍🍳👨‍🍳
