@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: dev
+      target: dev-api
     container_name: api
     env_file:
       - .env
@@ -21,7 +21,59 @@ services:
       - .:/app
       - /app/node_modules
       - /app/apps/api/node_modules
+      - /app/apps/enricher/node_modules
       - /app/apps/mobile/node_modules
+      - /app/apps/aiworker/node_modules
+      - /app/packages/shared-utils/node_modules
+      - /app/packages/tsconfig/node_modules
+      - pnpm-store:/pnpm/store
+
+  enricher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev-enricher
+    container_name: enricher
+    env_file:
+      - .env
+    environment:
+      # PNPM_HOME: /pnpm
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/api/node_modules
+      - /app/apps/enricher/node_modules
+      - /app/apps/mobile/node_modules
+      - /app/apps/aiworker/node_modules
+      - /app/packages/shared-utils/node_modules
+      - /app/packages/tsconfig/node_modules
+      - pnpm-store:/pnpm/store
+
+  aiworker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev-aiworker
+    container_name: aiworker
+    env_file:
+      - .env
+    environment:
+      # PNPM_HOME: /pnpm
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/api/node_modules
+      - /app/apps/enricher/node_modules
+      - /app/apps/mobile/node_modules
+      - /app/apps/aiworker/node_modules
       - /app/packages/shared-utils/node_modules
       - /app/packages/tsconfig/node_modules
       - pnpm-store:/pnpm/store
@@ -41,6 +93,12 @@ services:
     restart: always
     ports:
       - "6379:6379"
+
+  nats:
+    image: nats:2-alpine
+    restart: always
+    ports:
+      - "4222:4222"
 
 volumes:
    pnpm-store:

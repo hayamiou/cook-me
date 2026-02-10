@@ -1,5 +1,5 @@
 {
-  "name": "@cook-me/api",
+  "name": "@cook-me/enricher",
   "version": "0.0.0",
   "private": true,
   "type": "commonjs",
@@ -13,13 +13,12 @@
   },
   "dependencies": {
     "@cook-me/shared-utils": "workspace:^",
+    "@nestjs/bullmq": "^11.0.4",
     "@nestjs/cli": "^11.0.10",
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
     "@nestjs/microservices": "^11.1.13",
-    "@nestjs/mongoose": "^11.0.4",
-    "@nestjs/platform-express": "^11.1.9",
-    "mongoose": "^8.20.0",
+    "bullmq": "^5.67.3",
     "nats": "^2.29.3",
     "reflect-metadata": "^0.2.2",
     "run-script-webpack-plugin": "^0.2.3"
