@@ -43,7 +43,7 @@ Tous les packages du workspace suivent la convention :
 - **Node.js ≥ 20**
 - **pnpm**
 - **Docker**
-- **docker compose**
+- **Docker Compose v2** (`docker compose`)
 - (Recommandé) **WSL / Linux** pour les environnements Windows
 
 ---
