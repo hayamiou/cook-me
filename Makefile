@@ -20,31 +20,31 @@ install:
 	pnpm install
 
 build:
-	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose build api
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose build api
 
 up:
-	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose up
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose up
 
 up-d:
-	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose up -d
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose up -d
 
 down:
-	docker-compose down
+	docker compose down
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 ps:
-	docker-compose ps
+	docker compose ps
 
 api:
-	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose up api
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose up api
 
 mongo:
-	docker-compose up mongo
+	docker compose up mongo
 
 redis:
-	docker-compose up redis
+	docker compose up redis
 
 mobile:
 	pnpm --filter @cook-me/mobile dev
@@ -61,4 +61,4 @@ dev:
 	@echo "  Terminal 2: make tunnel"
 
 clean:
-	docker-compose down -v
+	docker compose down -v
