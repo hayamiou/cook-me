@@ -1,6 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { RecipesService } from './recipes.service'
+import { Recipe } from './schemas/recipe.schema'
 
+@ApiTags('recipes')
 @Controller('recipes')
 export class RecipesController {
   constructor(private readonly recipesService: RecipesService) {}
@@ -11,5 +14,14 @@ export class RecipesController {
   @Post()
   create(@Body() body: any) {
     return this.recipesService.create(body)
+  }
+
+  @Get()
+  async getRecipes(): Promise<Recipe[]> {
+    try {
+      return await this.recipesService.getAllRecipes()
+    } catch (error) {
+      throw new InternalServerErrorException('Erreur lors de la récupération des recettes')
+    }
   }
 }

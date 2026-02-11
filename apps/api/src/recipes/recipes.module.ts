@@ -1,14 +1,18 @@
 import { Module } from '@nestjs/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { MongooseModule } from '@nestjs/mongoose'
-import { Recipe, RecipeSchema } from './recipes.schema'
 import { RecipesController } from './recipes.controller'
+import { RecipesRepository } from './recipes.repository'
 import { RecipesService } from './recipes.service'
+import { Ingredient, IngredientSchema, Recipe, RecipeSchema } from './schemas/recipe.schema'
 
 @Module({
   imports: [
     // Indispensable : lie le nom "Recipe" au schéma réel
-    MongooseModule.forFeature([{ name: Recipe.name, schema: RecipeSchema }]),
+    MongooseModule.forFeature([
+      { name: Recipe.name, schema: RecipeSchema },
+      { name: Ingredient.name, schema: IngredientSchema },
+    ]),
     ClientsModule.register([
       {
         name: 'BROKER_SERVICE',
@@ -19,7 +23,8 @@ import { RecipesService } from './recipes.service'
       },
     ]),
   ],
-  providers: [RecipesService],
   controllers: [RecipesController],
+  providers: [RecipesService, RecipesRepository],
+  exports: [RecipesService, RecipesRepository],
 })
 export class RecipesModule {}

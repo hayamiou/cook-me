@@ -20,11 +20,13 @@
     "@nestjs/microservices": "^11.1.13",
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.1.9",
+    "@nestjs/swagger": "^11.2.6",
     "mongoose": "^8.20.0",
     "nats": "^2.29.3",
     "nestjs-zod": "^5.1.1",
     "reflect-metadata": "^0.2.2",
-    "run-script-webpack-plugin": "^0.2.3"
+    "run-script-webpack-plugin": "^0.2.3",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^",
