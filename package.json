@@ -16,8 +16,8 @@
     "devAll": "pnpm --filter='@cook-me/*' --parallel dev",
     "dev:mobile:wait": "wait-on http://localhost:3001 && pnpm dev:mobile",
     "dev": "concurrently \"pnpm dev:docker\" \"pnpm dev:mobile:wait\"",
-    "dev:docker": "docker-compose up",
-    "dev:docker:build": "docker-compose up --build",
+    "dev:docker": "docker compose up",
+    "dev:docker:build": "docker compose up --build",
     "dev:mobile": "pnpm --filter mobile dev",
     "prepare": "husky"
   },
