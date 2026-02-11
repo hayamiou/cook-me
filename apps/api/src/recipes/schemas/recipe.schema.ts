@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Types } from 'mongoose'
 
 export type RecipeDocument = Recipe & Document
 
@@ -15,7 +15,7 @@ export enum UnitEnum {
 /**
  * Sous-schema Ingredient
  */
-@Schema({ _id: true })
+@Schema()
 export class Ingredient {
   @Prop({ required: true })
   title!: string
@@ -33,11 +33,25 @@ export class Ingredient {
 @Schema({ timestamps: true })
 export class Recipe {
   @Prop({
-    type: [Ingredient],
-    required: true,
+    type: [
+      {
+        ingredient: {
+          type: Types.ObjectId,
+          ref: Ingredient.name,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
     default: [],
   })
-  ingredients!: [{ Ingredient_id; quantity }]
+  ingredients!: {
+    ingredient: Types.ObjectId | Ingredient
+    quantity: number
+  }[]
 
   @Prop({ required: true })
   name!: string
@@ -49,4 +63,5 @@ export class Recipe {
   etapes!: string
 }
 
+export const IngredientSchema = SchemaFactory.createForClass(Ingredient)
 export const RecipeSchema = SchemaFactory.createForClass(Recipe)

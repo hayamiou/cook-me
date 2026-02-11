@@ -41,6 +41,7 @@ services:
       MONGODB_URI: mongodb://mongo:27017/CMDB
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      CI: true
     depends_on:
       - mongo
       - redis
