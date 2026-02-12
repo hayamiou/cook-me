@@ -1,0 +1,13 @@
+{
+  "name": "@cook-me/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist", "src"],
+  "peerDependencies": {
+    "zod": "*"
+  },
+  "devDependencies": {
+    "@cook-me/tsconfig": "workspace:^"
+  }
+}

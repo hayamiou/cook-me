@@ -1,0 +1,17 @@
+{
+  "name": "@cook-me/ms-utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist", "src"],
+  "dependencies": {
+    "@cook-me/schemas": "workspace:^"
+  },
+  "peerDependencies": {
+    "zod": "*",
+    "@nestjs/microservices": "*"
+  },
+  "devDependencies": {
+    "@cook-me/tsconfig": "workspace:^"
+  }
+}
