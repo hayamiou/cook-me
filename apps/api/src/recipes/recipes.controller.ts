@@ -1,4 +1,12 @@
-import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
+import { createRecipeDtoSchema } from '@cook-me/schemas'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Post,
+} from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { RecipesService } from './recipes.service'
 import { Recipe } from './schemas/recipe.schema'
@@ -12,8 +20,16 @@ export class RecipesController {
     return this.recipesService.getHello()
   }
   @Post()
-  create(@Body() body: any) {
-    return this.recipesService.create(body)
+  create(@Body() body: unknown) {
+    const parsedBody = createRecipeDtoSchema.safeParse(body)
+    if (!parsedBody.success) {
+      throw new BadRequestException({
+        message: 'Invalid payload for POST /recipes',
+        errors: parsedBody.error.flatten(),
+      })
+    }
+
+    return this.recipesService.create(parsedBody.data)
   }
 
   @Get()

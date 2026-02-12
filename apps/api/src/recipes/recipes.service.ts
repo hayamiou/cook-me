@@ -1,3 +1,4 @@
+import { type CreateRecipeDto } from '@cook-me/schemas'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { InjectModel } from '@nestjs/mongoose'
@@ -17,7 +18,7 @@ export class RecipesService {
     return 'Hello World!'
   }
 
-  async create(data: any) {
+  async create(data: CreateRecipeDto) {
     const recipe = await this.recipeModel.create(data)
 
     this.client.emit('RecipeCreated', recipe).subscribe({
