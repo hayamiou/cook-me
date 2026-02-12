@@ -1,5 +1,7 @@
+import { CreateRecipeDto, createRecipeDtoSchema } from '@cook-me/schemas'
 import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+import { ZodValidationPipe } from '../../pipes/zod-validation-pipe'
 import { RecipesService } from './recipes.service'
 import { Recipe } from './schemas/recipe.schema'
 
@@ -11,8 +13,9 @@ export class RecipesController {
   getHello(): string {
     return this.recipesService.getHello()
   }
+
   @Post()
-  create(@Body() body: any) {
+  create(@Body(new ZodValidationPipe(createRecipeDtoSchema)) body: CreateRecipeDto) {
     return this.recipesService.create(body)
   }
 
