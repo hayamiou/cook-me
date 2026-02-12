@@ -8,8 +8,8 @@ import {
   Post,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
+import { RecipeEntity } from './entities/recipe.entity'
 import { RecipesService } from './recipes.service'
-import { Recipe } from './schemas/recipe.schema'
 
 @ApiTags('recipes')
 @Controller('recipes')
@@ -20,7 +20,7 @@ export class RecipesController {
     return this.recipesService.getHello()
   }
   @Post()
-  create(@Body() body: unknown) {
+  create(@Body() body: unknown): Promise<RecipeEntity> {
     const parsedBody = createRecipeDtoSchema.safeParse(body)
     if (!parsedBody.success) {
       throw new BadRequestException({
@@ -33,7 +33,7 @@ export class RecipesController {
   }
 
   @Get()
-  async getRecipes(): Promise<Recipe[]> {
+  async getRecipes(): Promise<RecipeEntity[]> {
     try {
       return await this.recipesService.getAllRecipes()
     } catch (error) {

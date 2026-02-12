@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document, Types } from 'mongoose'
+import { HydratedDocument, Types } from 'mongoose'
 
-export type RecipeDocument = Recipe & Document
+export type RecipeDocument = HydratedDocument<Recipe>
 
 /**
  * Enum pour les unités
@@ -49,7 +49,7 @@ export class Recipe {
     default: [],
   })
   ingredients!: {
-    ingredient: Types.ObjectId | Ingredient
+    ingredient: Types.ObjectId | (Ingredient & { _id: Types.ObjectId })
     quantity: number
   }[]
 
@@ -61,6 +61,9 @@ export class Recipe {
 
   @Prop({ required: false })
   etapes!: string
+
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export const IngredientSchema = SchemaFactory.createForClass(Ingredient)

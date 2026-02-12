@@ -112,6 +112,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@cook-me/schemas':
+        specifier: workspace:^
+        version: link:../../packages/schemas
       '@cook-me/shared-utils':
         specifier: workspace:^
         version: link:../../packages/shared-utils
@@ -361,6 +364,16 @@ importers:
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
+
+  packages/schemas:
+    dependencies:
+      zod:
+        specifier: ^4.3.5
+        version: 4.3.5
+    devDependencies:
+      '@cook-me/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
 
   packages/shared-utils:
     devDependencies:
