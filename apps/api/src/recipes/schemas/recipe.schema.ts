@@ -1,20 +1,32 @@
+import { RecipeEntity } from '@cook-me/schemas'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument, Types } from 'mongoose'
+import { Document, Types } from 'mongoose'
 
-export type RecipeDocument = HydratedDocument<Recipe>
+export type RecipeDocument = Recipe & Document
 
-/**
- * Enum pour les unités
- */
+ 
+//Enum pour les unités
 export enum UnitEnum {
   GRAMMES = 'grammes',
   LITRES = 'litres',
   SANS = 'sans',
 }
 
-/**
- * Sous-schema Ingredient
- */
+
+ 
+//Enum pour les catégories
+export enum CategoryEnum {
+  POTAGES = 'potages',
+  VEGES = 'végés',
+  VIANDES = 'viandes',
+  POISSONS = 'poissons',
+  PLATS_COMPLETS = 'plats complets',
+  DESSERTS = 'desserts',
+}
+
+
+ 
+//Sous-schema Ingredient
 @Schema()
 export class Ingredient {
   @Prop({ required: true })
@@ -27,11 +39,12 @@ export class Ingredient {
   unit!: UnitEnum
 }
 
-/**
- * Schema principal Recipe
- */
+
+//Schema principal Recipe
 @Schema({ timestamps: true })
-export class Recipe {
+export class Recipe implements RecipeEntity {
+  _id!: Types.ObjectId
+
   @Prop({
     type: [
       {
@@ -49,7 +62,7 @@ export class Recipe {
     default: [],
   })
   ingredients!: {
-    ingredient: Types.ObjectId | (Ingredient & { _id: Types.ObjectId })
+    ingredient: Types.ObjectId | Ingredient
     quantity: number
   }[]
 
@@ -62,8 +75,25 @@ export class Recipe {
   @Prop({ required: false })
   etapes!: string
 
-  createdAt?: Date
-  updatedAt?: Date
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  isLiked!: boolean
+
+  @Prop({
+    type: String,
+    enum: CategoryEnum,
+    required: true,
+  })
+  category!: CategoryEnum
+
+  @Prop({
+    type: String,
+    required: false,
+    trim: true,
+  })
+  image?: string
 }
 
 export const IngredientSchema = SchemaFactory.createForClass(Ingredient)

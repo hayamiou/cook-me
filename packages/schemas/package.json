@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+<<<<<<< HEAD
   "main": "./dist/cjs/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -15,6 +16,11 @@
   "files": ["dist", "src"],
   "dependencies": {
     "zod": "^4.3.5"
+=======
+  "files": ["dist", "src"],
+  "peerDependencies": {
+    "zod": "*"
+>>>>>>> c22fb4a (feat: work in progress)
   },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^"

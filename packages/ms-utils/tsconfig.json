@@ -1,11 +1,7 @@
 {
   "extends": "@cook-me/tsconfig/base.json",
   "compilerOptions": {
-<<<<<<< HEAD
-    "rootDir": "src",
-=======
     "rootDir": ".",
->>>>>>> c22fb4a (feat: work in progress)
     "outDir": "dist"
   },
   "include": ["src/**/*.ts"]
