@@ -12,14 +12,15 @@
     "test:cov": "vitest run --coverage"
   },
   "dependencies": {
-    "@cook-me/schemas": "workspace:^",
     "@cook-me/ms-utils": "workspace:^",
+    "@cook-me/schemas": "workspace:^",
     "@cook-me/shared-utils": "workspace:^",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/cli": "^11.0.10",
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
     "@nestjs/microservices": "^11.1.13",
+    "axios": "^1.13.5",
     "bullmq": "^5.67.3",
     "nats": "^2.29.3",
     "reflect-metadata": "^0.2.2",

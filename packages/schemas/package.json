@@ -5,7 +5,8 @@
   "type": "module",
   "files": ["dist", "src"],
   "peerDependencies": {
-    "zod": "*"
+    "zod": "*",
+    "rxjs": "*"
   },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^"

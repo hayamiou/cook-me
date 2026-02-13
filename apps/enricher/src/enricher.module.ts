@@ -1,7 +1,7 @@
 import { BullModule } from '@nestjs/bullmq'
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
+import { EnricherController } from './enricher.controller'
+import { EnricherService } from './enricher.service'
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { AppService } from './app.service'
       name: 'aiQueue',
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [EnricherController],
+  providers: [EnricherService],
 })
-export class AppModule {}
+export class EnricherModule {}

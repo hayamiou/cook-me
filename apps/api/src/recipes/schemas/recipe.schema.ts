@@ -63,7 +63,7 @@ export class Recipe implements RecipeEntity {
   idCreator!: string
 
   @Prop({ required: false })
-  etapes!: string
+  steps!: string
 }
 
 export const IngredientSchema = SchemaFactory.createForClass(Ingredient)

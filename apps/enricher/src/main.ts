@@ -5,10 +5,10 @@ declare const module: any
 
 import { NestFactory } from '@nestjs/core'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
-import { AppModule } from './app.module'
+import { EnricherModule } from './enricher.module'
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(EnricherModule, {
     transport: Transport.NATS,
     options: {
       servers: ['nats://nats:4222'],
