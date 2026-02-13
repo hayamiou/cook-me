@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { ClientProxy, EventNames, EventPayload } from '@cook-me/ms-utils'
+import { ClientProxy, EventPayload } from '@cook-me/ms-utils'
 import { AIGeneratedEventNames } from '@cook-me/ms-utils/events'
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq'
 import { Inject } from '@nestjs/common'
