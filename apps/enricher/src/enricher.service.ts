@@ -3,7 +3,7 @@ import { AIGeneratedEventNames } from '@cook-me/ms-utils/events'
 import { RecipeEntity } from '@cook-me/schemas'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Injectable } from '@nestjs/common'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { Queue } from 'bullmq'
 
 type RecipeImageGeneratedPayloadCallback = { id: string }
@@ -42,8 +42,14 @@ export class EnricherService {
 
       return response.data
     } catch (error: unknown) {
-      console.error("Erreur lors de l'appel PATCH à l'API:", error.response?.data || error.message)
-      throw new Error(`Failed to update API: ${error.message}`)
+      if (error instanceof Error) {
+        console.error(
+          "Erreur lors de l'appel PATCH à l'API:",
+          error.message,
+          error instanceof AxiosError ? error.response?.data : null,
+        )
+      }
+      throw error
     }
   }
 }
