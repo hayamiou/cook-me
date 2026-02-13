@@ -44,6 +44,7 @@
   },
   "resolutions": {},
   "dependencies": {
+    "react-native-safe-area-context": "~5.6.2",
     "zod": "^4.3.5"
   }
 }
