@@ -9,10 +9,6 @@ import { Recipe } from './schemas/recipe.schema'
 @Controller('recipes')
 export class RecipesController {
   constructor(private readonly recipesService: RecipesService) {}
-  @Get('hello')
-  getHello(): string {
-    return this.recipesService.getHello()
-  }
 
   @Post()
   create(@Body(new ZodValidationPipe(createRecipeDtoSchema)) body: CreateRecipeDto) {

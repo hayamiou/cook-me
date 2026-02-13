@@ -4,10 +4,10 @@ import 'reflect-metadata'
 declare const module: any
 
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
+import { AiworkerModule } from './aiworker.module'
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(AppModule)
+  const app = await NestFactory.createApplicationContext(AiworkerModule)
 
   if (module.hot) {
     module.hot.accept()

@@ -51,6 +51,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.987.0
         version: 3.987.0
+      '@cook-me/ms-utils':
+        specifier: workspace:^
+        version: link:../../packages/ms-utils
       '@cook-me/shared-utils':
         specifier: workspace:^
         version: link:../../packages/shared-utils
@@ -233,6 +236,9 @@ importers:
       '@nestjs/microservices':
         specifier: ^11.1.13
         version: 11.1.13(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(ioredis@5.9.2)(nats@2.29.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      axios:
+        specifier: ^1.13.5
+        version: 1.13.5
       bullmq:
         specifier: ^5.67.3
         version: 5.67.3
@@ -391,6 +397,9 @@ importers:
       '@nestjs/microservices':
         specifier: '*'
         version: 11.1.13(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(ioredis@5.9.2)(nats@2.29.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      rxjs:
+        specifier: '*'
+        version: 7.8.2
       zod:
         specifier: '*'
         version: 4.3.5
@@ -401,6 +410,9 @@ importers:
 
   packages/schemas:
     dependencies:
+      rxjs:
+        specifier: '*'
+        version: 7.8.2
       zod:
         specifier: '*'
         version: 4.3.5

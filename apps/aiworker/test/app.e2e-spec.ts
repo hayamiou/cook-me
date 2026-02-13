@@ -2,8 +2,8 @@ import type { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { afterAll, beforeAll, describe, it } from 'vitest'
-import { AppModule } from '../src/app.module'
-import { AppService } from '../src/app.service'
+import { AiworkerModule } from '../src/aiworker.module'
+import { AiworkerService } from '../src/aiworker.service'
 
 describe('API e2e', () => {
   let app: INestApplication
@@ -20,9 +20,9 @@ describe('API e2e', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AiworkerModule],
     })
-      .overrideProvider(AppService)
+      .overrideProvider(AiworkerService)
       .useValue(appService)
       .compile()
 

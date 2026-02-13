@@ -9,7 +9,8 @@
   },
   "peerDependencies": {
     "zod": "*",
-    "@nestjs/microservices": "*"
+    "@nestjs/microservices": "*",
+    "rxjs": "*"
   },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^"

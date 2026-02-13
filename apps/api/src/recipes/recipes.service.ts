@@ -1,9 +1,10 @@
 import { ClientProxy } from '@cook-me/ms-utils'
+import { CreateRecipeDto } from '@cook-me/schemas'
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { RecipesRepository } from './recipes.repository'
-import { Recipe } from './recipes.schema'
+import { Recipe } from './schemas/recipe.schema'
 
 @Injectable()
 export class RecipesService {
@@ -13,9 +14,11 @@ export class RecipesService {
     private readonly recipesRepository: RecipesRepository,
   ) {}
 
-  async create(data: any) {
+  //Création d'une recette
+  async create(data: CreateRecipeDto) {
     const recipe = await this.recipeModel.create(data)
 
+    //émission au broker
     this.client.emit('RecipeCreated', recipe).subscribe({
       complete: () => console.log('Event published: order.created'),
       error: err => console.error('Error publishing event:', err),
