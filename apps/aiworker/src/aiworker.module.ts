@@ -17,7 +17,7 @@ import { AiworkerProcessor } from './aiworker.processor'
     }),
     ClientsModule.register([
       {
-        name: 'NATS_SERVICE',
+        name: 'BROKER_SERVICE',
         transport: Transport.NATS,
         options: {
           servers: ['nats://nats:4222'],

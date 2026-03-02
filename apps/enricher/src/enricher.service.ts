@@ -31,7 +31,7 @@ export class EnricherService {
     })
   }
 
-  //Renvoi de l'image key à l'API (PATCH)
+  //Renvoi de l'image key à l'API (PATCH) DEPRECIATED
   async patchRecipeWithGeneratedImage(data: RecipeImageGeneratedPayload) {
     try {
       console.log(`[Service] Envoi du PATCH pour la recette ${data.callbackPayload.id}...`)

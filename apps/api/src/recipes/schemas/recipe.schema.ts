@@ -64,6 +64,9 @@ export class Recipe implements RecipeEntity {
 
   @Prop({ required: false })
   steps!: string
+
+  @Prop({ required: false })
+  imageKey!: string
 }
 
 export const IngredientSchema = SchemaFactory.createForClass(Ingredient)
