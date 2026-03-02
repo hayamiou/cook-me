@@ -1,11 +1,14 @@
-import { EventPattern, EventPayload } from '@cook-me/ms-utils'
-import { Controller } from '@nestjs/common'
+import { ClientProxy, EventPattern, EventPayload } from '@cook-me/ms-utils'
+import { Controller, Inject } from '@nestjs/common'
 import { Ctx, NatsContext, Payload } from '@nestjs/microservices'
 import { EnricherService } from './enricher.service'
 
 @Controller()
 export class EnricherController {
-  constructor(private readonly appService: EnricherService) {}
+  constructor(
+    @Inject('BROKER_SERVICE') private brokerClient: ClientProxy,
+    private readonly appService: EnricherService,
+  ) {}
 
   //Réception d'un message du broker : recette créée. envoi de la requête en queue redis
   @EventPattern('RecipeCreated')
@@ -26,6 +29,11 @@ export class EnricherController {
     @Ctx() context: NatsContext,
   ) {
     console.log(`Subject: ${context.getSubject()}`, data)
-    await this.appService.patchRecipeWithGeneratedImage(data)
+    //await this.appService.patchRecipeWithGeneratedImage(data)
+    //On image generated, envoi de l'info au broker
+    this.brokerClient.emit('PatchDocument', data).subscribe({
+      complete: () => console.log('Event published: PatchDocument'),
+      error: err => console.error('Error publishing event:', err),
+    })
   }
 }

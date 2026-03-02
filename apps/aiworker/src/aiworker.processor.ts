@@ -9,7 +9,7 @@ import { Job } from 'bullmq'
 @Processor('aiQueue')
 export class AiworkerProcessor extends WorkerHost {
   constructor(
-    @Inject('NATS_SERVICE') private natsClient: ClientProxy,
+    @Inject('BROKER_SERVICE') private brokerClient: ClientProxy,
     @Inject('S3_CLIENT') private readonly s3Client: S3Client,
   ) {
     super()
@@ -70,7 +70,7 @@ export class AiworkerProcessor extends WorkerHost {
       console.log(`[Worker] Image stockée : ${name}.png`)
 
       // ENVOI AU BROKER (NATS)
-      this.natsClient.emit<AIGeneratedEventNames>(callbackEvent.name, {
+      this.brokerClient.emit<AIGeneratedEventNames>(callbackEvent.name, {
         callbackPayload: callbackEvent.payload,
         imageKey: fileName,
       })

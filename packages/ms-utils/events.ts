@@ -12,4 +12,5 @@ export type AIGeneratedEventNames = 'RecipeImageGenerated'
 export const events = {
   RecipeCreated: { payload: recipeSchema } satisfies EventConfig,
   RecipeImageGenerated: { payload: aiWorkerImagePayloadSchema } satisfies EventConfig,
+  PatchDocument: { payload: aiWorkerImagePayloadSchema } satisfies EventConfig,
 } as const
