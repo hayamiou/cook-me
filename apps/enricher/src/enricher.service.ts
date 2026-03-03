@@ -30,26 +30,4 @@ export class EnricherService {
       },
     })
   }
-
-  //Renvoi de l'image key à l'API (PATCH) DEPRECIATED
-  async patchRecipeWithGeneratedImage(data: RecipeImageGeneratedPayload) {
-    try {
-      console.log(`[Service] Envoi du PATCH pour la recette ${data.callbackPayload.id}...`)
-
-      const response = await axios.patch(`api/recipes/${data.callbackPayload.id}/image`, {
-        imageKey: data.imageKey,
-      })
-
-      return response.data
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error(
-          "Erreur lors de l'appel PATCH à l'API:",
-          error.message,
-          error instanceof AxiosError ? error.response?.data : null,
-        )
-      }
-      throw error
-    }
-  }
 }

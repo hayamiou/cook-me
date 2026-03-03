@@ -13,9 +13,9 @@
     "test:cov": "vitest run --coverage"
   },
   "dependencies": {
-    "@cook-me/shared-utils": "workspace:^",
     "@cook-me/ms-utils": "workspace:^",
     "@cook-me/schemas": "workspace:^",
+    "@cook-me/shared-utils": "workspace:^",
     "@nestjs/cli": "^11.0.10",
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
@@ -23,6 +23,7 @@
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.1.9",
     "@nestjs/swagger": "^11.2.6",
+    "mongodb": "^7.1.0",
     "mongoose": "^8.20.0",
     "nats": "^2.29.3",
     "nestjs-zod": "^5.1.1",
