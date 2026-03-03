@@ -20,7 +20,7 @@ export class RecipesService {
 
     //émission au broker
     this.brokerClient.emit('RecipeCreated', recipe).subscribe({
-      complete: () => console.log('Event published: order.created'),
+      complete: () => console.log('Event published: RecipeCreated'),
       error: err => console.error('Error publishing event:', err),
     })
 
