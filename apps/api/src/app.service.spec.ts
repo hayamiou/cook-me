@@ -4,8 +4,8 @@ import { AppService } from './app.service'
 describe('AppService', () => {
   it('getState returns ok + hello message', () => {
     // Arrange
-    const service = new AppService()
-    
+    const service = new AppService({} as never)
+
     // Act
     const state = service.getState()
 
