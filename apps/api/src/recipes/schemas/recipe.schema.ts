@@ -1,6 +1,7 @@
 import { RecipeEntity, WithObjectId } from '@cook-me/schemas'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Types } from 'mongoose'
+import { string } from 'zod'
 
 export type RecipeDocument = Recipe & Document
 
@@ -8,6 +9,8 @@ export type RecipeDocument = Recipe & Document
 export enum UnitEnum {
   GRAMMES = 'grammes',
   LITRES = 'litres',
+  CUILLERE_A_SOUPE = 'cuillere_a_soupe',
+  CUILLERE_A_CAFE = 'cuillere_a_cafe',
   SANS = 'sans',
 }
 
@@ -49,7 +52,7 @@ export class Recipe implements WithObjectId<RecipeEntity> {
         },
         quantity: {
           type: Number,
-          required: true,
+          required: false,
         },
       },
     ],
