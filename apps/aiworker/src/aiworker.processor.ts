@@ -5,11 +5,12 @@ import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq'
 import { Inject } from '@nestjs/common'
 import axios from 'axios'
 import { Job } from 'bullmq'
+import { firstValueFrom } from 'rxjs'
 
 @Processor('aiQueue')
 export class AiworkerProcessor extends WorkerHost {
   constructor(
-    @Inject('NATS_SERVICE') private natsClient: ClientProxy,
+    @Inject('BROKER_SERVICE') private brokerClient: ClientProxy,
     @Inject('S3_CLIENT') private readonly s3Client: S3Client,
   ) {
     super()
@@ -70,10 +71,12 @@ export class AiworkerProcessor extends WorkerHost {
       console.log(`[Worker] Image stockée : ${name}.png`)
 
       // ENVOI AU BROKER (NATS)
-      this.natsClient.emit<AIGeneratedEventNames>(callbackEvent.name, {
-        callbackPayload: callbackEvent.payload,
-        imageKey: fileName,
-      })
+      await firstValueFrom(
+        this.brokerClient.emit<AIGeneratedEventNames>(callbackEvent.name, {
+          callbackPayload: callbackEvent.payload,
+          imageKey: fileName,
+        }),
+      )
 
       return { success: true, key: fileName }
     } catch (error) {

@@ -25,6 +25,9 @@
     "reflect-metadata": "^0.2.2",
     "run-script-webpack-plugin": "^0.2.3"
   },
+  "peerDependencies": {
+    "rxjs": "*"
+  },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^",
     "@nestjs/schematics": "^11.0.9",

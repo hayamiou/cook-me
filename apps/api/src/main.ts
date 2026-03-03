@@ -4,6 +4,7 @@ import 'reflect-metadata'
 declare const module: any
 
 import { NestFactory } from '@nestjs/core'
+import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 
@@ -11,6 +12,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   app.enableCors()
   const port = Number(process.env['PORT'] ?? 3001)
+
+  //Configuration microservice (NATS)
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.NATS,
+    options: {
+      servers: ['nats://nats:4222'],
+    },
+  })
+  await app.startAllMicroservices()
 
   // ---------------- Swagger ----------------
   const config = new DocumentBuilder()
