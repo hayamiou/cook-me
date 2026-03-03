@@ -1,32 +1,27 @@
-import { CreateRecipeDto, createRecipeDtoSchema, RecipeEntityDto } from '@cook-me/schemas'
+import { EventPattern, EventPayload } from '@cook-me/ms-utils'
+import { CreateRecipeDto, RecipeEntityDto } from '@cook-me/schemas'
 import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
+import { Ctx, NatsContext, Payload } from '@nestjs/microservices'
 import { ApiResponse, ApiTags } from '@nestjs/swagger'
-import { ZodResponse } from 'nestjs-zod'
-import { ZodValidationPipe } from '../../pipes/zod-validation-pipe'
-import { RecipeEntity } from './entities/recipe.entity'
 import { RecipesService } from './recipes.service'
+import { Recipe } from './schemas/recipe.schema'
 
 @ApiTags('recipes')
 @Controller('recipes')
 export class RecipesController {
   constructor(private readonly recipesService: RecipesService) {}
-  @Get('hello')
-  getHello(): string {
-    return this.recipesService.getHello()
+
+  //Réception d'un message du broker : image correctement générée, insertion en base.
+  @EventPattern('PatchDocument')
+  async onPatchDocument(
+    @Payload() data: EventPayload<'PatchDocument'>,
+    @Ctx() context: NatsContext,
+  ) {
+    console.log(`Patch du document : ${context.getSubject()}`, data)
+    return this.recipesService.updateImageKey(data.callbackPayload.id, data.imageKey)
   }
 
-  /* @Post()
-  create(@Body() body: unknown): Promise<RecipeEntity> {
-    const parsedBody = createRecipeDtoSchema.safeParse(body)
-    if (!parsedBody.success) {
-      throw new BadRequestException({
-        message: 'Invalid payload for POST /recipes',
-        errors: parsedBody.error.flatten(),
-      })
-    }
-
-    return this.recipesService.create(parsedBody.data)
-    */
+  //Création d'une recette
   @Post()
   @ApiResponse({
     type: RecipeEntityDto,
@@ -36,7 +31,7 @@ export class RecipesController {
   }
 
   @Get()
-  async getRecipes(): Promise<RecipeEntity[]> {
+  async getRecipes(): Promise<Recipe[]> {
     try {
       return await this.recipesService.getAllRecipes()
     } catch (error) {

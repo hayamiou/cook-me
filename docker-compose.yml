@@ -20,9 +20,9 @@ services:
     entrypoint: >
       /bin/sh -c "
       sleep 5;
-      /usr/bin/mc alias set minioDocker http://minio:9000 minio minioSecret;
-      /usr/bin/mc mb minioDocker/cookme;
-      /usr/bin/mc anonymous set download minioDocker/cookme;
+      /usr/bin/mc alias set minioDocker http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
+      /usr/bin/mc mb minioDocker/${MINIO_BUCKET};
+      /usr/bin/mc anonymous set download minioDocker/${MINIO_BUCKET};
       exit 0;
       "
 

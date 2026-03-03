@@ -1,7 +1,8 @@
 import { S3Client } from '@aws-sdk/client-s3'
 import { BullModule } from '@nestjs/bullmq'
 import { Module } from '@nestjs/common'
-import { AppProcessor } from './app.processor'
+import { ClientsModule, Transport } from '@nestjs/microservices'
+import { AiworkerProcessor } from './aiworker.processor'
 
 @Module({
   imports: [
@@ -14,24 +15,32 @@ import { AppProcessor } from './app.processor'
     BullModule.registerQueue({
       name: 'aiQueue',
     }),
+    ClientsModule.register([
+      {
+        name: 'BROKER_SERVICE',
+        transport: Transport.NATS,
+        options: {
+          servers: ['nats://nats:4222'],
+        },
+      },
+    ]),
   ],
   providers: [
-    AppProcessor,
+    AiworkerProcessor,
     {
-      // On définit le client S3 ici
       provide: 'S3_CLIENT',
       useFactory: () => {
         return new S3Client({
-          endpoint: 'http://minio:9000', // 'minio' si dans docker-compose, sinon 'localhost'
+          endpoint: 'http://minio:9000',
           region: 'us-east-1',
           credentials: {
             accessKeyId: 'minio',
             secretAccessKey: 'minioSecret',
           },
-          forcePathStyle: true, // Crucial pour Minio
+          forcePathStyle: true,
         })
       },
     },
   ],
 })
-export class AppModule {}
+export class AiworkerModule {}

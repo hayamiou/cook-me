@@ -1,11 +1,16 @@
 import { recipeSchema } from '@cook-me/schemas'
-import type { ZodSchema } from 'zod'
+import z, { type ZodSchema } from 'zod'
 
 type EventConfig = {
   payload: ZodSchema
 }
 
+const aiWorkerImagePayloadSchema = z.object({ callbackPayload: z.any(), imageKey: z.string() })
+
+export type AIGeneratedEventNames = 'RecipeImageGenerated'
+
 export const events = {
   RecipeCreated: { payload: recipeSchema } satisfies EventConfig,
-  // ... autres events
+  RecipeImageGenerated: { payload: aiWorkerImagePayloadSchema } satisfies EventConfig,
+  PatchDocument: { payload: aiWorkerImagePayloadSchema } satisfies EventConfig,
 } as const

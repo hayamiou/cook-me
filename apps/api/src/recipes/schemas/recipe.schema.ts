@@ -1,4 +1,4 @@
-import { RecipeEntity } from '@cook-me/schemas'
+import { RecipeEntity, WithObjectId } from '@cook-me/schemas'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Types } from 'mongoose'
 
@@ -36,7 +36,7 @@ export class Ingredient {
 
 //Schema principal Recipe
 @Schema({ timestamps: true })
-export class Recipe implements RecipeEntity {
+export class Recipe implements WithObjectId<RecipeEntity> {
   _id!: Types.ObjectId
 
   @Prop({
@@ -67,7 +67,10 @@ export class Recipe implements RecipeEntity {
   idCreator!: string
 
   @Prop({ required: false })
-  etapes!: string
+  steps!: string
+
+  @Prop({ required: false })
+  imageKey?: string
 
   @Prop({
     type: Boolean,
@@ -81,13 +84,6 @@ export class Recipe implements RecipeEntity {
     required: true,
   })
   category!: CategoryEnum
-
-  @Prop({
-    type: String,
-    required: false,
-    trim: true,
-  })
-  image?: string
 }
 
 export const IngredientSchema = SchemaFactory.createForClass(Ingredient)
