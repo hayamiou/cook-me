@@ -1,64 +1,68 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome'
-import { Link, Tabs } from 'expo-router'
-import type React from 'react'
-import { Pressable } from 'react-native'
-import { useClientOnlyValue } from '@/components/useClientOnlyValue'
-import { useColorScheme } from '@/components/useColorScheme'
-import Colors from '@/constants/Colors'
+import { Ionicons } from '@expo/vector-icons'
+import { Tabs } from 'expo-router'
+import { Platform, useColorScheme } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { DARK, LIGHT } from '@/constants/theme'
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name']
-  color: string
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />
-}
-
+// Layout de la barre de navigation inférieure.
+// Configure les trois onglets (Toutes les recettes, Favoris, Mes recettes)
+// et leur apparence selon le thème système.
 export default function TabLayout() {
-  const colorScheme = useColorScheme()
+  const scheme = useColorScheme()
+  const C = scheme === 'dark' ? DARK : LIGHT
+  const insets = useSafeAreaInsets()
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
+        headerShown: false,
+        tabBarActiveTintColor: C.primary,
+        tabBarInactiveTintColor: C.textMuted,
+        tabBarStyle: {
+          backgroundColor: C.surface,
+          borderTopColor: C.border,
+          borderTopWidth: 1,
+          // Hauteur adaptative : ajoute le padding du bas de l'écran
+          height: Platform.OS === 'ios' ? 88 : 60 + insets.bottom,
+          paddingBottom: Platform.OS === 'ios' ? 34 : insets.bottom + 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
       }}
     >
+      {/* Tab 1 : Toutes les recettes (home) */}
       <Tabs.Screen
         name="accueil"
         options={{
-          title: 'Accueil',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          title: 'Toutes les recettes',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="book-outline" size={size} color={color} />
           ),
         }}
       />
+
+      {/* Tab 2 : Favoris */}
       <Tabs.Screen
-        name="two"
+        name="favoris"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Favoris',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="heart-outline" size={size} color={color} />
+          ),
         }}
       />
+
+      {/* Tab 3 : Mes recettes */}
       <Tabs.Screen
-        name="three"
+        name="mes-recettes"
         options={{
-          title: 'Tab Three',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Mes recettes',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="restaurant-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

@@ -15,6 +15,7 @@ type CartContextType = {
   addItems: (newItems: Omit<CartItem, 'id' | 'checked'>[]) => void
   addItem: (item: Omit<CartItem, 'id' | 'checked'>) => void
   toggleCheck: (id: string) => void
+  checkAll: () => void
   clearDone: () => void
   removeItem: (id: string) => void
   pendingCount: number
@@ -105,6 +106,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const toggleCheck = (id: string) =>
     setItems(prev => prev.map(i => (i.id === id ? { ...i, checked: !i.checked } : i)))
 
+  const checkAll = () => setItems(prev => prev.map(i => ({ ...i, checked: true })))
+
   const clearDone = () => setItems(prev => prev.filter(i => !i.checked))
 
   const removeItem = (id: string) => setItems(prev => prev.filter(i => i.id !== id))
@@ -113,7 +116,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItems, addItem, toggleCheck, clearDone, removeItem, pendingCount }}
+      value={{
+        items,
+        addItems,
+        addItem,
+        toggleCheck,
+        checkAll,
+        clearDone,
+        removeItem,
+        pendingCount,
+      }}
     >
       {children}
     </CartContext.Provider>
