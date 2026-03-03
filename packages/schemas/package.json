@@ -2,25 +2,9 @@
   "name": "@cook-me/schemas",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
-<<<<<<< HEAD
-  "main": "./dist/cjs/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./src/index.ts",
-      "require": "./dist/cjs/index.js"
-    }
-  },
-  "files": ["dist", "src"],
-  "dependencies": {
-    "zod": "^4.3.5"
-=======
-  "files": ["dist", "src"],
   "peerDependencies": {
-    "zod": "*"
->>>>>>> c22fb4a (feat: work in progress)
+    "zod": "*",
+    "nestjs-zod": "*"
   },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^"

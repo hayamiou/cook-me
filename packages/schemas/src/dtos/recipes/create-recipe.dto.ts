@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 
 const objectIdSchema = z
@@ -20,7 +21,12 @@ export const createRecipeDtoSchema = z
       )
       .min(1, 'at least one ingredient is required'),
     etapes: z.string().trim().optional(),
+    category: z.string(),
   })
   .strict()
 
-export type CreateRecipeDto = z.infer<typeof createRecipeDtoSchema>
+// Pour typer, ex: fetch POST cote front
+export type CreateRecipeType = z.infer<typeof createRecipeDtoSchema>
+
+// A utiliser cote Nest pour valider les body
+export class CreateRecipeDto extends createZodDto(createRecipeDtoSchema) {}

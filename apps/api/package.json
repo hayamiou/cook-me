@@ -13,7 +13,6 @@
     "test:cov": "vitest run --coverage"
   },
   "dependencies": {
-    "@cook-me/schemas": "workspace:^",
     "@cook-me/shared-utils": "workspace:^",
     "@cook-me/ms-utils": "workspace:^",
     "@cook-me/schemas": "workspace:^",

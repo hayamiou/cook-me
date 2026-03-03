@@ -118,12 +118,9 @@ importers:
 
   apps/api:
     dependencies:
-<<<<<<< HEAD
-=======
       '@cook-me/ms-utils':
         specifier: workspace:^
         version: link:../../packages/ms-utils
->>>>>>> c22fb4a (feat: work in progress)
       '@cook-me/schemas':
         specifier: workspace:^
         version: link:../../packages/schemas
@@ -383,12 +380,6 @@ importers:
         specifier: ~5.9.2
         version: 5.9.3
 
-<<<<<<< HEAD
-  packages/schemas:
-    dependencies:
-      zod:
-        specifier: ^4.3.5
-=======
   packages/ms-utils:
     dependencies:
       '@cook-me/schemas':
@@ -407,9 +398,11 @@ importers:
 
   packages/schemas:
     dependencies:
+      nestjs-zod:
+        specifier: '*'
+        version: 5.1.1(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/swagger@11.2.6(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2))(rxjs@7.8.2)(zod@4.3.5)
       zod:
         specifier: '*'
->>>>>>> c22fb4a (feat: work in progress)
         version: 4.3.5
     devDependencies:
       '@cook-me/tsconfig':

@@ -1,1 +1,2 @@
-export { type CreateRecipeDto, createRecipeDtoSchema } from './recipes/create-recipe.dto'
+export * from './dtos'
+export * from './entities'

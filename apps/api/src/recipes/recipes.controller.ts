@@ -1,6 +1,7 @@
-import { CreateRecipeDto, createRecipeDtoSchema } from '@cook-me/schemas'
+import { CreateRecipeDto, createRecipeDtoSchema, RecipeEntityDto } from '@cook-me/schemas'
 import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ZodResponse } from 'nestjs-zod'
 import { ZodValidationPipe } from '../../pipes/zod-validation-pipe'
 import { RecipeEntity } from './entities/recipe.entity'
 import { RecipesService } from './recipes.service'
@@ -14,7 +15,7 @@ export class RecipesController {
     return this.recipesService.getHello()
   }
 
- /* @Post()
+  /* @Post()
   create(@Body() body: unknown): Promise<RecipeEntity> {
     const parsedBody = createRecipeDtoSchema.safeParse(body)
     if (!parsedBody.success) {
@@ -26,7 +27,11 @@ export class RecipesController {
 
     return this.recipesService.create(parsedBody.data)
     */
-  create(@Body(new ZodValidationPipe(createRecipeDtoSchema)) body: CreateRecipeDto) {
+  @Post()
+  @ApiResponse({
+    type: RecipeEntityDto,
+  })
+  create(@Body() body: CreateRecipeDto) {
     return this.recipesService.create(body)
   }
 

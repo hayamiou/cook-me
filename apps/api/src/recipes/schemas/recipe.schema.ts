@@ -4,7 +4,6 @@ import { Document, Types } from 'mongoose'
 
 export type RecipeDocument = Recipe & Document
 
- 
 //Enum pour les unités
 export enum UnitEnum {
   GRAMMES = 'grammes',
@@ -12,8 +11,6 @@ export enum UnitEnum {
   SANS = 'sans',
 }
 
-
- 
 //Enum pour les catégories
 export enum CategoryEnum {
   POTAGES = 'potages',
@@ -24,8 +21,6 @@ export enum CategoryEnum {
   DESSERTS = 'desserts',
 }
 
-
- 
 //Sous-schema Ingredient
 @Schema()
 export class Ingredient {
@@ -38,7 +33,6 @@ export class Ingredient {
   })
   unit!: UnitEnum
 }
-
 
 //Schema principal Recipe
 @Schema({ timestamps: true })
@@ -62,7 +56,7 @@ export class Recipe implements RecipeEntity {
     default: [],
   })
   ingredients!: {
-    ingredient: Types.ObjectId | Ingredient
+    ingredient: Types.ObjectId
     quantity: number
   }[]
 
