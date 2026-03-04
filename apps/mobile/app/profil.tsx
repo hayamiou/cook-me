@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import React from 'react'
 import {
   Platform,
   StatusBar,
@@ -11,35 +10,15 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-// ─── Palettes clair / sombre ─────────────────────────────────────────────────
-const LIGHT = {
-  primary: '#F4A623',
-  primaryLight: '#FDEABF',
-  background: '#FAFAF7',
-  surface: '#FFFFFF',
-  text: '#1A1A1A',
-  textMuted: '#8A8A8A',
-  border: '#EFEFEF',
-  statusBar: 'dark-content' as const,
-}
-
-const DARK = {
-  primary: '#F4A623',
-  primaryLight: '#3D2E10',
-  background: '#111111',
-  surface: '#1E1E1E',
-  text: '#F0F0F0',
-  textMuted: '#888888',
-  border: '#2C2C2C',
-  statusBar: 'light-content' as const,
-}
+import { DARK, LIGHT } from '@/constants/theme'
 
 const MENU_ITEMS = [
   { icon: 'settings-outline', label: 'Paramètres' },
   { icon: 'log-out-outline', label: 'Se déconnecter' },
 ] as const
 
+// Écran de profil — responsabilité UI uniquement.
+// L'action de retour arrière est l'unique logique ; pas de hook nécessaire.
 export default function ProfileScreen() {
   const router = useRouter()
 

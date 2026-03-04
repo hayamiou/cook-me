@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -17,33 +16,13 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { DARK, LIGHT } from '@/constants/theme'
+import type { Ingredient } from '@/hooks/useCreateRecipeScreen'
+import { useCreateRecipeScreen } from '@/hooks/useCreateRecipeScreen'
 
-// ─── Palettes clair / sombre ─────────────────────────────────────────────────
-const LIGHT = {
-  primary: '#F4A623',
-  primaryLight: '#FDEABF',
-  background: '#FAFAF7',
-  surface: '#FFFFFF',
-  text: '#1A1A1A',
-  textMuted: '#8A8A8A',
-  border: '#EFEFEF',
-  overlay: 'rgba(0,0,0,0.45)',
-  statusBar: 'dark-content' as const,
-}
+// ─── Données statiques ────────────────────────────────────────────────────────
 
-const DARK = {
-  primary: '#F4A623',
-  primaryLight: '#3D2E10',
-  background: '#111111',
-  surface: '#1E1E1E',
-  text: '#F0F0F0',
-  textMuted: '#888888',
-  border: '#2C2C2C',
-  overlay: 'rgba(0,0,0,0.65)',
-  statusBar: 'light-content' as const,
-}
-
-// ─── Unités culinaires ───────────────────────────────────────────────────────
+// Unités culinaires disponibles dans le sélecteur
 const UNITS = [
   'g',
   'kg',
@@ -63,17 +42,10 @@ const UNITS = [
   'tasse(s)',
 ]
 
+// Catégories de recettes disponibles
 const CATEGORIES = ['Potages', 'Végés', 'Viandes', 'Poissons', 'Pâtes', 'Desserts', 'Petit-déj']
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-type Ingredient = {
-  id: string
-  name: string
-  quantity: string
-  unit: string
-}
-
-// ─── Composant : sélecteur d'unité inline ────────────────────────────────────
+// ─── Composant UI : sélecteur d'unité inline ─────────────────────────────────
 const UnitPicker = ({
   value,
   onChange,
@@ -81,8 +53,9 @@ const UnitPicker = ({
 }: {
   value: string
   onChange: (u: string) => void
-  C: typeof LIGHT
+  C: typeof LIGHT | typeof DARK
 }) => {
+  // État local d'ouverture du dropdown — reste dans le composant (pur UI)
   const [open, setOpen] = useState(false)
 
   return (
@@ -98,7 +71,7 @@ const UnitPicker = ({
         <Ionicons name="chevron-down" size={16} color={C.textMuted} />
       </TouchableOpacity>
 
-      {/* Dropdown unités */}
+      {/* Dropdown des unités */}
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.dropdownOverlay} onPress={() => setOpen(false)}>
           <View style={[styles.dropdownBox, { backgroundColor: C.surface, borderColor: C.border }]}>
@@ -139,7 +112,7 @@ const UnitPicker = ({
   )
 }
 
-// ─── Composant : modal d'ajout d'ingrédient ──────────────────────────────────
+// ─── Composant UI : modale d'ajout d'ingrédient ──────────────────────────────
 const IngredientModal = ({
   visible,
   onClose,
@@ -149,8 +122,9 @@ const IngredientModal = ({
   visible: boolean
   onClose: () => void
   onAdd: (ing: Omit<Ingredient, 'id'>) => void
-  C: typeof LIGHT
+  C: typeof LIGHT | typeof DARK
 }) => {
+  // États locaux du formulaire — restent dans le composant (pur UI de la modale)
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('1')
   const [unit, setUnit] = useState('')
@@ -158,7 +132,7 @@ const IngredientModal = ({
   const handleAdd = () => {
     if (!name.trim()) return
     onAdd({ name: name.trim(), quantity, unit })
-    // Reset
+    // Réinitialise le formulaire après ajout
     setName('')
     setQuantity('1')
     setUnit('')
@@ -174,12 +148,11 @@ const IngredientModal = ({
         <Pressable style={[styles.modalOverlay, { backgroundColor: C.overlay }]} onPress={onClose}>
           {/* stopPropagation : évite que le tap dans la carte ferme le modal */}
           <Pressable style={[styles.modalCard, { backgroundColor: C.surface }]}>
-            {/* Poignée */}
+            {/* Poignée de la bottom sheet */}
             <View style={[styles.modalHandle, { backgroundColor: C.border }]} />
 
             <Text style={[styles.modalTitle, { color: C.text }]}>Ajouter un ingrédient</Text>
 
-            {/* Nom */}
             <Text style={[styles.modalLabel, { color: C.textMuted }]}>Ingrédient</Text>
             <TextInput
               value={name}
@@ -194,10 +167,8 @@ const IngredientModal = ({
               returnKeyType="next"
             />
 
-            {/* Quantité */}
             <Text style={[styles.modalLabel, { color: C.textMuted }]}>Quantité</Text>
             <View style={styles.qtyRow}>
-              {/* Bouton − */}
               <TouchableOpacity
                 onPress={() => setQuantity(p => String(Math.max(0, parseFloat(p || '0') - 1)))}
                 style={[styles.qtyBtn, { backgroundColor: C.background, borderColor: C.border }]}
@@ -217,7 +188,6 @@ const IngredientModal = ({
                 textAlign="center"
               />
 
-              {/* Bouton + */}
               <TouchableOpacity
                 onPress={() => setQuantity(p => String(parseFloat(p || '0') + 1))}
                 style={[styles.qtyBtn, { backgroundColor: C.background, borderColor: C.border }]}
@@ -227,11 +197,9 @@ const IngredientModal = ({
               </TouchableOpacity>
             </View>
 
-            {/* Unité */}
             <Text style={[styles.modalLabel, { color: C.textMuted }]}>Unité</Text>
             <UnitPicker value={unit} onChange={setUnit} C={C} />
 
-            {/* Boutons action */}
             <View style={styles.modalActions}>
               <TouchableOpacity
                 onPress={onClose}
@@ -260,26 +228,29 @@ const IngredientModal = ({
   )
 }
 
-// ─── Écran principal ─────────────────────────────────────────────────────────
+// ─── Écran principal — responsabilité UI uniquement ───────────────────────────
+// Toute la logique du formulaire est déléguée à useCreateRecipeScreen.
 export default function CreateRecipeScreen() {
-  const router = useRouter()
   const scheme = useColorScheme()
+  // Palette de couleurs selon le thème système
   const C = scheme === 'dark' ? DARK : LIGHT
 
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [time, setTime] = useState('')
-  const [category, setCategory] = useState<string | null>(null)
-  const [ingredients, setIngredients] = useState<Ingredient[]>([])
-  const [modalVisible, setModalVisible] = useState(false)
-
-  const addIngredient = (ing: Omit<Ingredient, 'id'>) => {
-    setIngredients(prev => [...prev, { ...ing, id: Date.now().toString() }])
-  }
-
-  const removeIngredient = (id: string) => {
-    setIngredients(prev => prev.filter(i => i.id !== id))
-  }
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    time,
+    setTime,
+    category,
+    setCategory,
+    ingredients,
+    modalVisible,
+    setModalVisible,
+    addIngredient,
+    removeIngredient,
+    goBack,
+  } = useCreateRecipeScreen()
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
@@ -288,13 +259,8 @@ export default function CreateRecipeScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        {/* Header */}
         <View style={[styles.header, { backgroundColor: C.background }]}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity onPress={goBack} style={styles.backButton} activeOpacity={0.7}>
             <Ionicons name="chevron-back" size={26} color={C.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: C.text }]}>Nouvelle recette</Text>
@@ -302,7 +268,7 @@ export default function CreateRecipeScreen() {
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Photo */}
+          {/* Zone d'ajout de photo */}
           <TouchableOpacity
             style={[
               styles.imagePicker,
@@ -314,7 +280,6 @@ export default function CreateRecipeScreen() {
             <Text style={[styles.imagePickerText, { color: C.primary }]}>Ajouter une photo</Text>
           </TouchableOpacity>
 
-          {/* Nom */}
           <Text style={[styles.label, { color: C.text }]}>Nom de la recette *</Text>
           <TextInput
             value={title}
@@ -327,7 +292,6 @@ export default function CreateRecipeScreen() {
             ]}
           />
 
-          {/* Description */}
           <Text style={[styles.label, { color: C.text }]}>Description</Text>
           <TextInput
             value={description}
@@ -344,7 +308,6 @@ export default function CreateRecipeScreen() {
             textAlignVertical="top"
           />
 
-          {/* Temps */}
           <Text style={[styles.label, { color: C.text }]}>Temps de préparation</Text>
           <TextInput
             value={time}
@@ -357,7 +320,7 @@ export default function CreateRecipeScreen() {
             ]}
           />
 
-          {/* ── Ingrédients ────────────────────────────────────────────── */}
+          {/* Section ingrédients */}
           <View style={styles.sectionRow}>
             <Text style={[styles.label, { color: C.text, marginBottom: 0 }]}>Ingrédients</Text>
             {ingredients.length > 0 && (
@@ -415,7 +378,6 @@ export default function CreateRecipeScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Catégorie */}
           <Text style={[styles.label, { color: C.text }]}>Catégorie</Text>
           <View style={styles.chipRow}>
             {CATEGORIES.map(cat => (
@@ -444,7 +406,7 @@ export default function CreateRecipeScreen() {
 
           <View style={{ height: 40 }} />
 
-          {/* Bouton publier */}
+          {/* Bouton publier — désactivé tant que le titre est vide */}
           <TouchableOpacity
             style={[styles.submitBtn, { backgroundColor: title ? C.primary : C.primaryLight }]}
             activeOpacity={title ? 0.85 : 1}
@@ -463,7 +425,7 @@ export default function CreateRecipeScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Modal ingrédient */}
+      {/* Modale d'ajout d'ingrédient */}
       <IngredientModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -474,7 +436,7 @@ export default function CreateRecipeScreen() {
   )
 }
 
-// ─── Styles statiques ────────────────────────────────────────────────────────
+// ─── Styles ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: {
@@ -513,13 +475,8 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   chipText: { fontSize: 13, fontWeight: '500' },
 
-  // ── Section ingrédients
-  sectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
+  // Section ingrédients
+  sectionRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
   ingredientCount: {
     fontSize: 12,
     fontWeight: '600',
@@ -529,12 +486,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 10,
   },
-  ingredientList: {
-    borderWidth: 1,
-    borderRadius: 12,
-    marginBottom: 10,
-    overflow: 'hidden',
-  },
+  ingredientList: { borderWidth: 1, borderRadius: 12, marginBottom: 10, overflow: 'hidden' },
   ingredientRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -543,16 +495,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     gap: 10,
   },
-  ingredientDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-  },
-  ingredientText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
-  },
+  ingredientDot: { width: 7, height: 7, borderRadius: 4 },
+  ingredientText: { flex: 1, fontSize: 14, fontWeight: '500' },
   addIngredientBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -565,11 +509,8 @@ const styles = StyleSheet.create({
   },
   addIngredientText: { fontSize: 14, fontWeight: '600' },
 
-  // ── Modal
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
+  // Modal ingrédient
+  modalOverlay: { flex: 1, justifyContent: 'flex-end' },
   modalCard: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -586,13 +527,7 @@ const styles = StyleSheet.create({
       android: { elevation: 12 },
     }),
   },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
   modalTitle: { fontSize: 17, fontWeight: '700', marginBottom: 20 },
   modalLabel: {
     fontSize: 12,
@@ -609,14 +544,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 16,
   },
-
-  // Quantité
-  qtyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 16,
-  },
+  qtyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   qtyBtn: {
     width: 40,
     height: 40,
@@ -634,8 +562,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     height: 40,
   },
-
-  // Unité
   unitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -647,8 +573,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   unitBtnText: { fontSize: 15 },
-
-  // Dropdown unités
   dropdownOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -689,12 +613,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   dropdownItemText: { fontSize: 15 },
-
-  // Actions modal
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
+  modalActions: { flexDirection: 'row', gap: 12 },
   modalCancelBtn: {
     flex: 1,
     paddingVertical: 14,
@@ -703,15 +622,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalCancelText: { fontSize: 15, fontWeight: '600' },
-  modalAddBtn: {
-    flex: 2,
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
+  modalAddBtn: { flex: 2, paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   modalAddText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 
-  // Submit
+  // Bouton publier
   submitBtn: {
     flexDirection: 'row',
     alignItems: 'center',

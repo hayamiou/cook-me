@@ -1,6 +1,4 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import { useState } from 'react'
 import {
   FlatList,
   Image,
@@ -17,53 +15,11 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useCart } from '@/context/CartContext'
+import { DARK, LIGHT } from '@/constants/theme'
+import type { Recipe } from '@/data/recipes'
+import { useHomeScreen } from '@/hooks/useHomeScreen'
 
-// ─── Palettes ─────────────────────────────────────────────────────────────────
-const LIGHT = {
-  primary: '#F4A623',
-  primaryLight: '#FDEABF',
-  background: '#FAFAF7',
-  surface: '#FFFFFF',
-  text: '#1A1A1A',
-  textMuted: '#8A8A8A',
-  border: '#EFEFEF',
-  heart: '#E05555',
-  searchBg: '#FFFFFF',
-  cardBg: '#FFFFFF',
-  overlay: 'rgba(0,0,0,0.45)',
-  statusBar: 'dark-content' as const,
-}
-
-const DARK = {
-  primary: '#F4A623',
-  primaryLight: '#3D2E10',
-  background: '#111111',
-  surface: '#1E1E1E',
-  text: '#F0F0F0',
-  textMuted: '#888888',
-  border: '#2C2C2C',
-  heart: '#E05555',
-  searchBg: '#1E1E1E',
-  cardBg: '#1E1E1E',
-  overlay: 'rgba(0,0,0,0.65)',
-  statusBar: 'light-content' as const,
-}
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-type Ingredient = { name: string; quantity: string; unit: string }
-type Recipe = {
-  id: string
-  title: string
-  category: string
-  time: string
-  difficulty: string
-  image: string
-  liked: boolean
-  ingredients: Ingredient[]
-}
-
-// ─── Données mock ─────────────────────────────────────────────────────────────
+// Catégories disponibles pour filtrer les recettes
 const CATEGORIES = [
   { id: '1', label: 'Potages', emoji: '🍲' },
   { id: '2', label: 'Vegés', emoji: '🥗' },
@@ -74,81 +30,7 @@ const CATEGORIES = [
   { id: '7', label: 'Petit-dej', emoji: '🥐' },
 ]
 
-const INITIAL_RECIPES: Recipe[] = [
-  {
-    id: '1',
-    title: 'Saumon aux haricots verts',
-    category: 'Poissons',
-    time: '25 min',
-    difficulty: 'Facile',
-    image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600',
-    liked: false,
-    ingredients: [
-      { name: 'Paves de saumon', quantity: '2', unit: 'piece(s)' },
-      { name: 'Haricots verts', quantity: '300', unit: 'g' },
-      { name: 'Beurre', quantity: '30', unit: 'g' },
-      { name: 'Ail', quantity: '2', unit: 'gousse(s)' },
-      { name: 'Citron', quantity: '1', unit: 'piece(s)' },
-      { name: 'Huile olive', quantity: '2', unit: 'c. a soupe' },
-      { name: 'Sel & poivre', quantity: '1', unit: 'pincee' },
-    ],
-  },
-  {
-    id: '2',
-    title: 'Veloute de carottes',
-    category: 'Potages',
-    time: '30 min',
-    difficulty: 'Facile',
-    image: 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=600',
-    liked: false,
-    ingredients: [
-      { name: 'Carottes', quantity: '500', unit: 'g' },
-      { name: 'Oignon', quantity: '1', unit: 'piece(s)' },
-      { name: 'Bouillon de legumes', quantity: '750', unit: 'ml' },
-      { name: 'Creme fraiche', quantity: '100', unit: 'ml' },
-      { name: 'Gingembre frais', quantity: '1', unit: 'c. a cafe' },
-      { name: 'Huile olive', quantity: '1', unit: 'c. a soupe' },
-    ],
-  },
-  {
-    id: '3',
-    title: 'Risotto aux champignons',
-    category: 'Vegés',
-    time: '40 min',
-    difficulty: 'Moyen',
-    image: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600',
-    liked: true,
-    ingredients: [
-      { name: 'Riz arborio', quantity: '300', unit: 'g' },
-      { name: 'Champignons', quantity: '250', unit: 'g' },
-      { name: 'Oignon', quantity: '1', unit: 'piece(s)' },
-      { name: 'Vin blanc sec', quantity: '150', unit: 'ml' },
-      { name: 'Bouillon de legumes', quantity: '1', unit: 'l' },
-      { name: 'Parmesan rape', quantity: '60', unit: 'g' },
-      { name: 'Beurre', quantity: '40', unit: 'g' },
-    ],
-  },
-  {
-    id: '4',
-    title: 'Poulet roti aux herbes',
-    category: 'Viandes',
-    time: '1h10',
-    difficulty: 'Facile',
-    image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c3?w=600',
-    liked: false,
-    ingredients: [
-      { name: 'Poulet entier', quantity: '1', unit: 'piece(s)' },
-      { name: 'Ail', quantity: '4', unit: 'gousse(s)' },
-      { name: 'Romarin', quantity: '3', unit: 'brin(s)' },
-      { name: 'Thym', quantity: '3', unit: 'brin(s)' },
-      { name: 'Beurre', quantity: '50', unit: 'g' },
-      { name: 'Huile olive', quantity: '2', unit: 'c. a soupe' },
-      { name: 'Citron', quantity: '1', unit: 'piece(s)' },
-    ],
-  },
-]
-
-// ─── Composant Catégorie ──────────────────────────────────────────────────────
+// Composant UI : pastille de catégorie dans la liste horizontale
 const CategoryItem = ({
   item,
   selected,
@@ -158,7 +40,7 @@ const CategoryItem = ({
   item: (typeof CATEGORIES)[0]
   selected: boolean
   onPress: () => void
-  C: typeof LIGHT
+  C: typeof LIGHT | typeof DARK
 }) => (
   <TouchableOpacity onPress={onPress} activeOpacity={0.75} style={styles.categoryItem}>
     <View
@@ -182,107 +64,105 @@ const CategoryItem = ({
   </TouchableOpacity>
 )
 
-// ─── Composant Recette ────────────────────────────────────────────────────────
+// Composant UI : carte d'une recette dans le feed
 const RecipeCard = ({
   item,
   onToggleLike,
   onAddToCart,
+  onOpen,
   C,
 }: {
   item: Recipe
   onToggleLike: () => void
   onAddToCart: () => void
-  C: typeof LIGHT
+  onOpen: () => void
+  C: typeof LIGHT | typeof DARK
 }) => (
   <View style={[styles.recipeCard, { backgroundColor: C.cardBg }]}>
-    <Text style={[styles.recipeTitle, { color: C.text }]}>{item.title}</Text>
-    <Text style={[styles.recipeIngredientsSummary, { color: C.textMuted }]}>
-      {item.ingredients
-        .slice(0, 3)
-        .map(i => i.name)
-        .join(', ')}
-      {item.ingredients.length > 3 ? `+${item.ingredients.length - 3}` : ''}
-    </Text>
+    <TouchableOpacity activeOpacity={0.9} onPress={onOpen}>
+      <Text style={[styles.recipeTitle, { color: C.text }]}>{item.title}</Text>
+      <Text style={[styles.recipeIngredientsSummary, { color: C.textMuted }]}>
+        {item.ingredients
+          .slice(0, 3)
+          .map(i => i.name)
+          .join(', ')}
+        {item.ingredients.length > 3 ? `+${item.ingredients.length - 3}` : ''}
+      </Text>
 
-    <View style={[styles.recipeImageWrapper, { backgroundColor: C.border }]}>
-      <Image source={{ uri: item.image }} style={styles.recipeImage} resizeMode="cover" />
+      <View style={[styles.recipeImageWrapper, { backgroundColor: C.border }]}>
+        <Image source={{ uri: item.image }} style={styles.recipeImage} resizeMode="cover" />
 
-      <TouchableOpacity onPress={onToggleLike} activeOpacity={0.8} style={styles.likeButton}>
-        <Ionicons
-          name={item.liked ? 'heart' : 'heart-outline'}
-          size={22}
-          color={item.liked ? C.heart : '#FFFFFF'}
-        />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={onToggleLike} activeOpacity={0.8} style={styles.likeButton}>
+          <Ionicons
+            name={item.liked ? 'heart' : 'heart-outline'}
+            size={22}
+            color={item.liked ? C.heart : '#FFFFFF'}
+          />
+        </TouchableOpacity>
 
-      <View style={styles.recipeMeta}>
-        <View style={styles.recipeMetaItem}>
-          <Ionicons name="time-outline" size={13} color="#FFFFFF" />
-          <Text style={styles.recipeMetaText}>{item.time}</Text>
+        <View style={styles.imageBottomRow}>
+          <View style={styles.recipeMeta}>
+            <View style={styles.recipeMetaItem}>
+              <Ionicons name="time-outline" size={13} color="#FFFFFF" />
+              <Text style={styles.recipeMetaText}>{item.time}</Text>
+            </View>
+            <View style={styles.recipeMetaDot} />
+            <Text style={styles.recipeMetaText}>{item.difficulty}</Text>
+            <View style={styles.recipeMetaDot} />
+            <Text style={styles.recipeMetaText}>{item.ingredients.length} ingr.</Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={onAddToCart}
+            activeOpacity={0.85}
+            style={[styles.addToCartBtn, { backgroundColor: C.primary }]}
+          >
+            <Ionicons name="cart-outline" size={18} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
-        <View style={styles.recipeMetaDot} />
-        <Text style={styles.recipeMetaText}>{item.difficulty}</Text>
-        <View style={styles.recipeMetaDot} />
-        <Text style={styles.recipeMetaText}>{item.ingredients.length} ingr.</Text>
       </View>
-
-      <TouchableOpacity
-        onPress={onAddToCart}
-        activeOpacity={0.85}
-        style={[styles.addToCartBadge, { backgroundColor: C.primary }]}
-      >
-        <Ionicons name="cart-outline" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
-        <Text style={styles.addToCartText}>Ajouter aux courses</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   </View>
 )
 
-// ─── Écran principal ──────────────────────────────────────────────────────────
+// Écran d'accueil — responsabilité UI uniquement.
+// Toute la logique (filtrage, panier, navigation) est déléguée à useHomeScreen.
 export default function HomeScreen() {
-  const router = useRouter()
   const scheme = useColorScheme()
+  // Palette de couleurs selon le thème système
   const C = scheme === 'dark' ? DARK : LIGHT
 
-  const { addItems, pendingCount } = useCart()
-
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [recipes, setRecipes] = useState<Recipe[]>(INITIAL_RECIPES)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [confirmRecipe, setConfirmRecipe] = useState<Recipe | null>(null)
-  const [successVisible, setSuccessVisible] = useState(false)
-
-  const toggleLike = (id: string) =>
-    setRecipes(prev => prev.map(r => (r.id === id ? { ...r, liked: !r.liked } : r)))
-
-  // Ouvre la popup de confirmation
-  const handleAddToCart = (recipe: Recipe) => setConfirmRecipe(recipe)
-
-  // Valide l'ajout
-  const confirmAdd = () => {
-    if (!confirmRecipe) return
-    addItems(confirmRecipe.ingredients)
-
-    setConfirmRecipe(null)
-
-    setSuccessVisible(true)
-    setTimeout(() => setSuccessVisible(false), 2500)
-  }
-
-  const filteredRecipes = recipes.filter(r => {
-    const matchCat = selectedCategory ? r.category === selectedCategory : true
-    const matchSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchCat && matchSearch
-  })
+  const {
+    toggleLike,
+    pendingCount,
+    selectedCategory,
+    searchQuery,
+    setSearchQuery,
+    confirmRecipe,
+    successVisible,
+    filteredRecipes,
+    openRecipe,
+    handleAddToCart,
+    confirmAdd,
+    cancelConfirm,
+    toggleCategory,
+    clearCategory,
+    clearSearch,
+    goToProfile,
+    goToCart,
+    goToCreateRecipe,
+  } = useHomeScreen()
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
+      style={[styles.safe, { backgroundColor: C.background }]}
+    >
       <StatusBar barStyle={C.statusBar} backgroundColor={C.background} />
 
-      {/* ── Header ── */}
       <View style={[styles.header, { backgroundColor: C.background }]}>
         <TouchableOpacity
-          onPress={() => router.push('/profil')}
+          onPress={goToProfile}
           activeOpacity={0.7}
           style={styles.headerIcon}
           accessibilityLabel="Profil"
@@ -293,7 +173,7 @@ export default function HomeScreen() {
         <Text style={[styles.headerTitle, { color: C.text }]}>Cook-Me</Text>
 
         <TouchableOpacity
-          onPress={() => router.push('/panier')}
+          onPress={goToCart}
           activeOpacity={0.7}
           style={styles.headerIcon}
           accessibilityLabel="Panier"
@@ -308,7 +188,6 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Recherche ── */}
         <View
           style={[styles.searchWrapper, { backgroundColor: C.searchBg, borderColor: C.border }]}
         >
@@ -322,13 +201,12 @@ export default function HomeScreen() {
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} activeOpacity={0.7}>
+            <TouchableOpacity onPress={clearSearch} activeOpacity={0.7}>
               <Ionicons name="close-circle" size={18} color={C.textMuted} />
             </TouchableOpacity>
           )}
         </View>
 
-        {/* ── Catégories ── */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: C.text }]}>Categories</Text>
           <TouchableOpacity activeOpacity={0.7}>
@@ -346,18 +224,17 @@ export default function HomeScreen() {
             <CategoryItem
               item={item}
               selected={selectedCategory === item.label}
-              onPress={() => setSelectedCategory(prev => (prev === item.label ? null : item.label))}
+              onPress={() => toggleCategory(item.label)}
               C={C}
             />
           )}
         />
 
-        {/* ── Recettes ── */}
         <View style={[styles.sectionHeader, { marginTop: 8 }]}>
           <Text style={[styles.sectionTitle, { color: C.text }]}>Recettes</Text>
           {selectedCategory && (
             <TouchableOpacity
-              onPress={() => setSelectedCategory(null)}
+              onPress={clearCategory}
               activeOpacity={0.7}
               style={[styles.clearFilterBadge, { backgroundColor: C.primaryLight }]}
             >
@@ -382,6 +259,7 @@ export default function HomeScreen() {
               item={recipe}
               onToggleLike={() => toggleLike(recipe.id)}
               onAddToCart={() => handleAddToCart(recipe)}
+              onOpen={() => openRecipe(recipe)}
               C={C}
             />
           ))
@@ -390,10 +268,9 @@ export default function HomeScreen() {
         <View style={{ height: 90 }} />
       </ScrollView>
 
-      {/* ── FAB ── */}
       <View style={styles.fabContainer}>
         <TouchableOpacity
-          onPress={() => router.push('/create-recipe')}
+          onPress={goToCreateRecipe}
           activeOpacity={0.85}
           style={[styles.fabButton, { backgroundColor: C.primary }]}
           accessibilityLabel="Creer une recette"
@@ -403,19 +280,15 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* ── Popup confirmation ── */}
+      {/* Modale de confirmation d'ajout au panier */}
       <Modal
         visible={confirmRecipe !== null}
         transparent
         animationType="fade"
-        onRequestClose={() => setConfirmRecipe(null)}
+        onRequestClose={cancelConfirm}
       >
-        <Pressable
-          style={[styles.modalOverlay, { backgroundColor: C.overlay }]}
-          onPress={() => setConfirmRecipe(null)}
-        >
+        <Pressable style={styles.modalOverlay} onPress={cancelConfirm}>
           <Pressable style={[styles.modalCard, { backgroundColor: C.surface }]}>
-            {/* Icone */}
             <View style={[styles.modalIconCircle, { backgroundColor: C.primaryLight }]}>
               <Ionicons name="cart-outline" size={30} color={C.primary} />
             </View>
@@ -423,14 +296,10 @@ export default function HomeScreen() {
             <Text style={[styles.modalTitle, { color: C.text }]}>Ajouter au panier ?</Text>
             <Text style={[styles.modalDesc, { color: C.textMuted }]}>
               {confirmRecipe
-                ? confirmRecipe.ingredients.length +
-                  ' ingredients de "' +
-                  confirmRecipe.title +
-                  '" seront ajoutes a ta liste de courses.'
+                ? `${confirmRecipe.ingredients.length} ingredients de "${confirmRecipe.title}" seront ajoutes a ta liste de courses.`
                 : ''}
             </Text>
 
-            {/* Liste rapide des ingredients */}
             {confirmRecipe && (
               <View
                 style={[
@@ -438,7 +307,7 @@ export default function HomeScreen() {
                   { backgroundColor: C.background, borderColor: C.border },
                 ]}
               >
-                {confirmRecipe.ingredients.slice(0, 4).map((ing, i) => (
+                {confirmRecipe.ingredients.slice(0, 4).map(ing => (
                   <View key={ing.name} style={styles.ingredientPreviewRow}>
                     <View style={[styles.ingredientDot, { backgroundColor: C.primary }]} />
                     <Text style={[styles.ingredientPreviewText, { color: C.text }]}>
@@ -454,10 +323,9 @@ export default function HomeScreen() {
               </View>
             )}
 
-            {/* Boutons */}
             <View style={styles.modalActions}>
               <TouchableOpacity
-                onPress={() => setConfirmRecipe(null)}
+                onPress={cancelConfirm}
                 style={[styles.modalCancelBtn, { borderColor: C.border }]}
                 activeOpacity={0.7}
               >
@@ -477,7 +345,7 @@ export default function HomeScreen() {
         </Pressable>
       </Modal>
 
-      {/* ── Toast succes ── */}
+      {/* Toast de confirmation */}
       {successVisible && (
         <View style={[styles.toast, { backgroundColor: C.surface, borderColor: C.primary }]}>
           <Ionicons name="checkmark-circle" size={20} color={C.primary} />
@@ -488,7 +356,7 @@ export default function HomeScreen() {
   )
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Styles ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: {
@@ -523,15 +391,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: Platform.OS === 'ios' ? 12 : 8,
     borderWidth: 1,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-      },
-      android: { elevation: 2 },
-    }),
   },
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, fontSize: 15, padding: 0 },
@@ -552,37 +411,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.07,
-        shadowRadius: 4,
-      },
-      android: { elevation: 2 },
-    }),
   },
   categoryEmoji: { fontSize: 28 },
   categoryLabel: { marginTop: 6, fontSize: 12, fontWeight: '500', textAlign: 'center' },
   clearFilterBadge: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
   clearFilterText: { fontSize: 12, fontWeight: '600' },
-  recipeCard: { marginHorizontal: 20, marginBottom: 20 },
-  recipeTitle: { fontSize: 15, fontWeight: '600', marginBottom: 3 },
-  recipeIngredientsSummary: { fontSize: 12, marginBottom: 8 },
+  recipeCard: { marginHorizontal: 20, marginBottom: 20, borderRadius: 16 },
+  recipeTitle: { fontSize: 15, fontWeight: '600', marginTop: 5, marginBottom: 3, paddingLeft: 14 },
+  recipeIngredientsSummary: { fontSize: 12, marginBottom: 8, paddingLeft: 14 },
   recipeImageWrapper: {
-    borderRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
     overflow: 'hidden',
     height: 190,
     position: 'relative',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.12,
-        shadowRadius: 8,
-      },
-      android: { elevation: 4 },
-    }),
   },
   recipeImage: { width: '100%', height: '100%' },
   likeButton: {
@@ -593,10 +435,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 7,
   },
-  recipeMeta: {
+  imageBottomRow: {
     position: 'absolute',
-    bottom: 44,
+    bottom: 12,
     left: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  recipeMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -608,22 +456,18 @@ const styles = StyleSheet.create({
   recipeMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   recipeMetaText: { fontSize: 11, color: '#FFFFFF', fontWeight: '500' },
   recipeMetaDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.6)' },
-  addToCartBadge: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
-    flexDirection: 'row',
+  addToCartBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    justifyContent: 'center',
   },
-  addToCartText: { fontSize: 12, fontWeight: '700', color: '#FFFFFF' },
   emptyState: { alignItems: 'center', paddingVertical: 48, gap: 12 },
   emptyStateText: { fontSize: 15, fontWeight: '500' },
   fabContainer: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 24 : 16,
+    bottom: Platform.OS === 'ios' ? 8 : 8,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -634,43 +478,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 30,
-    paddingVertical: 15,
+    paddingVertical: 10,
     paddingHorizontal: 36,
     width: '100%',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#F4A623',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
-        shadowRadius: 12,
-      },
-      android: { elevation: 8 },
-    }),
   },
   fabButtonText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.3 },
-
-  // ── Modal confirmation ──
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 28,
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
-  modalCard: {
-    width: '100%',
-    borderRadius: 24,
-    padding: 24,
-    alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
-      },
-      android: { elevation: 12 },
-    }),
-  },
+  modalCard: { width: '100%', borderRadius: 24, padding: 24, alignItems: 'center' },
   modalIconCircle: {
     width: 64,
     height: 64,
@@ -711,8 +531,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalConfirmText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
-
-  // ── Toast succes ──
   toast: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 110 : 90,
@@ -724,15 +542,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 30,
     borderWidth: 1.5,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.12,
-        shadowRadius: 8,
-      },
-      android: { elevation: 6 },
-    }),
   },
   toastText: { fontSize: 14, fontWeight: '600' },
 })

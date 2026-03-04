@@ -9,6 +9,7 @@ import '../global.css'
 
 import { useColorScheme } from '@/components/useColorScheme'
 import { CartProvider } from '@/context/CartContext'
+import { RecipesProvider } from '@/context/RecipesContext'
 
 export { ErrorBoundary } from 'expo-router'
 
@@ -16,8 +17,11 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 }
 
+// Empêche le splash screen de se cacher avant le chargement des polices.
 SplashScreen.preventAutoHideAsync()
 
+// Layout racine : charge les polices, gère le splash screen et enveloppe l'app
+// dans les providers globaux (CartProvider, RecipesProvider, ThemeProvider).
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -41,22 +45,27 @@ export default function RootLayout() {
   return <RootLayoutNav />
 }
 
+// Sous-composant interne : configure la navigation et les providers de thème.
+// Séparé de RootLayout pour utiliser useColorScheme après le chargement des polices.
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
 
   return (
     // ← CartProvider enveloppe tout, les tabs et les autres pages y ont accès
     <CartProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="panier" options={{ headerShown: false }} />
-          <Stack.Screen name="profil" options={{ headerShown: false }} />
-          <Stack.Screen name="create-recipe" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        </Stack>
-      </ThemeProvider>
+      <RecipesProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="panier" options={{ headerShown: false }} />
+            <Stack.Screen name="profil" options={{ headerShown: false }} />
+            <Stack.Screen name="create-recipe" options={{ headerShown: false }} />
+            <Stack.Screen name="recette/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          </Stack>
+        </ThemeProvider>
+      </RecipesProvider>
     </CartProvider>
   )
 }

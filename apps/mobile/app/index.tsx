@@ -1,6 +1,4 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import { useState } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,38 +12,26 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { DARK, LIGHT } from '@/constants/theme'
+import { useLoginScreen } from '@/hooks/useLoginScreen'
 
-// ─── Palettes ────────────────────────────────────────────────────────────────
-const LIGHT = {
-  primary: '#F4A623',
-  primaryLight: '#FDEABF',
-  background: '#FAFAF7',
-  surface: '#FFFFFF',
-  text: '#1A1A1A',
-  textMuted: '#8A8A8A',
-  border: '#E2E2E2',
-  statusBar: 'dark-content' as const,
-}
-
-const DARK = {
-  primary: '#F4A623',
-  primaryLight: '#3D2E10',
-  background: '#111111',
-  surface: '#1E1E1E',
-  text: '#F0F0F0',
-  textMuted: '#888888',
-  border: '#2C2C2C',
-  statusBar: 'light-content' as const,
-}
-
+// Écran de connexion — responsabilité UI uniquement.
+// Toute la logique (états, navigation) est déléguée à useLoginScreen.
 export default function LoginScreen() {
-  const router = useRouter()
   const scheme = useColorScheme()
+  // Palette de couleurs selon le thème système
   const C = scheme === 'dark' ? DARK : LIGHT
-
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPwd, setShowPwd] = useState(false)
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPwd,
+    toggleShowPwd,
+    isFormValid,
+    onLogin,
+    onSkip,
+  } = useLoginScreen()
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
@@ -59,20 +45,20 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* ── Logo / titre ── */}
           <View style={styles.topSection}>
+            <View style={[styles.logoCircle, { backgroundColor: C.primaryLight }]}>
+              <Text style={styles.logoEmoji}>🍳</Text>
+            </View>
             <Text style={[styles.appName, { color: C.text }]}>Cook-Me</Text>
             <Text style={[styles.subtitle, { color: C.textMuted }]}>
               Connecte-toi pour accéder à tes recettes
             </Text>
           </View>
 
-          {/* ── Carte formulaire ── */}
           <View style={[styles.card, { backgroundColor: C.surface, borderColor: C.border }]}>
             <Text style={[styles.cardTitle, { color: C.text }]}>Inscription</Text>
             <Text style={[styles.cardDesc, { color: C.textMuted }]}>Saisis tes informations</Text>
 
-            {/* Email */}
             <Text style={[styles.label, { color: C.text }]}>Email</Text>
             <View
               style={[
@@ -98,7 +84,6 @@ export default function LoginScreen() {
               />
             </View>
 
-            {/* Password */}
             <Text style={[styles.label, { color: C.text }]}>Mot de passe</Text>
             <View
               style={[
@@ -121,7 +106,7 @@ export default function LoginScreen() {
                 secureTextEntry={!showPwd}
                 autoCapitalize="none"
               />
-              <TouchableOpacity onPress={() => setShowPwd(p => !p)} activeOpacity={0.7}>
+              <TouchableOpacity onPress={toggleShowPwd} activeOpacity={0.7}>
                 <Ionicons
                   name={showPwd ? 'eye-off-outline' : 'eye-outline'}
                   size={18}
@@ -130,28 +115,25 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Bouton Login */}
             <TouchableOpacity
-              onPress={() => router.push('/accueil')}
+              onPress={onLogin}
               activeOpacity={0.85}
               style={[
                 styles.primaryBtn,
-                { backgroundColor: email && password ? C.primary : C.primaryLight },
+                { backgroundColor: isFormValid ? C.primary : C.primaryLight },
               ]}
             >
               <Text style={styles.primaryBtnText}>Se connecter</Text>
             </TouchableOpacity>
 
-            {/* Séparateur */}
             <View style={styles.separatorRow}>
               <View style={[styles.separatorLine, { backgroundColor: C.border }]} />
               <Text style={[styles.separatorText, { color: C.textMuted }]}>ou</Text>
               <View style={[styles.separatorLine, { backgroundColor: C.border }]} />
             </View>
 
-            {/* Bouton Plus tard */}
             <TouchableOpacity
-              onPress={() => router.push('/accueil')}
+              onPress={onSkip}
               activeOpacity={0.7}
               style={[styles.outlineBtn, { borderColor: C.border }]}
             >
@@ -159,7 +141,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Lien inscription */}
           <View style={styles.footerRow}>
             <Text style={[styles.footerText, { color: C.textMuted }]}>Pas encore de compte ? </Text>
             <TouchableOpacity activeOpacity={0.7}>
@@ -181,8 +162,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
-
-  // Top
   topSection: { alignItems: 'center', marginBottom: 32 },
   logoCircle: {
     width: 80,
@@ -195,8 +174,6 @@ const styles = StyleSheet.create({
   logoEmoji: { fontSize: 36 },
   appName: { fontSize: 28, fontWeight: '800', letterSpacing: 0.5, marginBottom: 6 },
   subtitle: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
-
-  // Card
   card: {
     borderRadius: 20,
     borderWidth: 1,
@@ -214,8 +191,6 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontSize: 20, fontWeight: '700', marginBottom: 4 },
   cardDesc: { fontSize: 14, marginBottom: 24 },
-
-  // Labels & inputs
   label: { fontSize: 13, fontWeight: '600', marginBottom: 7 },
   inputWrapper: {
     flexDirection: 'row',
@@ -227,13 +202,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   inputIcon: { marginRight: 8 },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    padding: 0,
-  },
-
-  // Bouton principal
+  input: { flex: 1, fontSize: 15, padding: 0 },
   primaryBtn: {
     borderRadius: 14,
     paddingVertical: 15,
@@ -250,32 +219,12 @@ const styles = StyleSheet.create({
     }),
   },
   primaryBtnText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
-
-  // Séparateur
-  separatorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-    gap: 10,
-  },
+  separatorRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 16, gap: 10 },
   separatorLine: { flex: 1, height: 1 },
   separatorText: { fontSize: 13 },
-
-  // Bouton outline
-  outlineBtn: {
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
+  outlineBtn: { borderRadius: 14, paddingVertical: 14, alignItems: 'center', borderWidth: 1 },
   outlineBtnText: { fontSize: 15, fontWeight: '600' },
-
-  // Footer
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  footerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   footerText: { fontSize: 14 },
   footerLink: { fontSize: 14, fontWeight: '700' },
 })
