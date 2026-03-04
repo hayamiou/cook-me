@@ -64,15 +64,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const storedToken = await SecureStore.getItemAsync('accessToken')
         if (storedToken) {
-          setAccessToken(storedToken)
-          setIsAuthenticated(true)
-          // Décoder le JWT pour extraire les infos utilisateur (sans vérification côté mobile)
           const payload = parseJwt(storedToken)
-          setUser({
-            userId: payload.sub,
-            email: payload.email,
-            username: payload.preferred_username,
-          })
+          const now = Math.floor(Date.now() / 1000)
+          if (!payload.sub || !payload.exp || payload.exp <= now) {
+            // Token invalide ou expiré : le supprimer et rester non authentifié
+            console.warn(
+              'Stored token is invalid or expired, clearing session.',
+              !payload.sub ? 'Missing sub.' : `Token expired at ${new Date(payload.exp * 1000).toISOString()}.`,
+            )
+            await SecureStore.deleteItemAsync('accessToken')
+          } else {
+            setAccessToken(storedToken)
+            setIsAuthenticated(true)
+            setUser({
+              userId: payload.sub,
+              email: payload.email,
+              username: payload.preferred_username,
+            })
+          }
         }
       } catch (error) {
         console.error('Error loading token:', error)
