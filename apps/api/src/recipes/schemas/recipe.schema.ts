@@ -1,7 +1,6 @@
 import { RecipeEntity } from '@cook-me/schemas'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Types } from 'mongoose'
-import { string } from 'zod'
 
 export type RecipeDocument = Recipe & Document
 

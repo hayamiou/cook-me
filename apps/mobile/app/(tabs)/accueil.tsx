@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import { useEffect } from 'react'
 import {
   FlatList,
   Image,
@@ -16,6 +18,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { DARK, LIGHT } from '@/constants/theme'
+import { useAuth } from '@/contexts/AuthContext'
 import type { Recipe } from '@/data/recipes'
 import { useHomeScreen } from '@/hooks/useHomeScreen'
 
@@ -129,8 +132,17 @@ const RecipeCard = ({
 // Toute la logique (filtrage, panier, navigation) est déléguée à useHomeScreen.
 export default function HomeScreen() {
   const scheme = useColorScheme()
+  const router = useRouter()
   // Palette de couleurs selon le thème système
   const C = scheme === 'dark' ? DARK : LIGHT
+  const { isAuthenticated, isLoading } = useAuth()
+
+  // Redirection si non authentifié
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/login')
+    }
+  }, [isAuthenticated, isLoading, router.replace])
 
   const {
     toggleLike,

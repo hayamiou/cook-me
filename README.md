@@ -1,241 +1,202 @@
-# **🍳 Cook-Me**
+# 🍳 Cook-Me
 
 Cook-Me est un projet fullstack en monorepo combinant :
 
-🧠 une API backend (NestJS, Docker)
+- 🧠 une API backend (NestJS, Docker)
+- 📱 une application mobile (Expo / React Native)
+- 🤖 des microservices (AI worker, enricher)
+- 📦 des packages partagés
 
-📱 une application mobile (Expo / React Native)
+L'objectif est de proposer une base stable, maintenable et pédagogique, adaptée à un travail en équipe sur plusieurs semaines.
 
-📦 des packages partagés
+Repository : `git@github.com:hayamiou/cook-me.git`
 
-L’objectif est de proposer une base stable, maintenable et pédagogique, adaptée à un travail en équipe sur plusieurs semaines.
-
-Repository :
-git@github.com:hayamiou/cook-me.git
+---
 
 ## 🗂️ Structure du projet
 
+```
 cook-me/
 ├─ apps/
-│  ├─ api/          → API NestJS (Dockerisée)
-│  └─ mobile/       → Application mobile Expo
+│  ├─ api/          → API NestJS (port 3001, Dockerisée)
+│  ├─ mobile/       → Application mobile Expo
+│  ├─ aiworker/     → Microservice IA (NestJS + NATS)
+│  └─ enricher/     → Microservice d'enrichissement (NestJS + NATS)
 │
 ├─ packages/
-│  ├─ shared-utils/ → Fonctions partagées
+│  ├─ schemas/      → DTOs et entités partagés
+│  ├─ ms-utils/     → Schémas d'événements NATS (Zod)
+│  ├─ shared-utils/ → Fonctions utilitaires partagées
 │  └─ tsconfig/     → Configuration TypeScript commune
 │
-├─ docker-compose.yml
+├─ docker-compose.yml   → Infrastructure complète
 ├─ Makefile
-├─ package.json
-├─ pnpm-lock.yaml
+├─ .env.example
 └─ README.md
+```
 
-## **📦 Convention de nommage des packages**
+**Infrastructure Docker :** MongoDB, Redis, NATS, MinIO, Keycloak, PostgreSQL (pour Keycloak)
 
-Tous les packages du workspace suivent la convention :
+**Convention de nommage des packages :** `@cook-me/<package-name>`
 
-@cook-me/<package-name>
+---
 
-## **⚙️ Prérequis**
+## ⚙️ Prérequis
 
-Node.js ≥ 20
+- Node.js ≥ 20
+- pnpm
+- Docker + Docker Compose v2 (`docker compose`)
+- Make
 
-pnpm
+> ⚠️ **Windows** → WSL2 fortement recommandé. Certaines commandes Make peuvent ne pas fonctionner en natif.
 
-Docker
+---
 
-Docker Compose v2 (docker compose)
+## 🧰 Setup initial
 
-Make
-
-Environnement Linux / macOS recommandé
-
-Windows → WSL2 fortement recommandé
-
-⚠️ Sur Windows natif, certaines commandes Make peuvent ne pas fonctionner correctement.
-Installez WSL2 pour garantir un environnement compatible.
-
-⚠️ Docker & BuildKit (Important)
-
-Le Dockerfile de l’API utilise des fonctionnalités Docker BuildKit :
-
-RUN --mount=type=cache ...
-
-BuildKit est recommandé pour builder l’image.
-
-## **🧰 Setup initial**
-
-### **Cloner le projet :**
-
+```bash
 git clone git@github.com:hayamiou/cook-me.git
 cd cook-me
-
-### **Installer les dépendances :**
-
 pnpm install
+```
 
+### Configurer les variables d'environnement
 
-## **🚀 Démarrage du projet**
+```bash
+cp .env.example .env
+cp apps/mobile/.env.example apps/mobile/.env
+```
 
+Éditez les deux fichiers `.env` selon votre environnement (voir section **Variables d'environnement** ci-dessous).
 
-### **🖥️ Ouvrir un 1er terminal pour le backend**
+### Configurer Keycloak
 
-#### Lancer l’API :
+Suivez le guide `KEYCLOAK_SETUP.md` pour créer le realm `cook-me`, les clients `cook-me-api` et `cook-me-mobile`, et un utilisateur de test.
 
-make up
+---
 
-#### Arrêter l'API :
+## 🚀 Démarrage
 
-make down
+### Terminal 1 — Backend (Docker)
 
-#### Checker les logs :
+```bash
+make up        # Démarre toute l'infrastructure
+make logs      # Suivre les logs en temps réel
+make down      # Arrêter les conteneurs
+```
 
-make logs
+### Terminal 2 — Mobile
 
-### **📱 Ouvrir un 2ème terminal pour le front**
+```bash
+make mobile    # Mode LAN (réseau Wi-Fi classique)
+make tunnel    # Mode tunnel (réseau restreint / test sur mobile physique)
+```
 
-**Mode standard (LAN)**
+> 💡 Utilisez `make tunnel` si vous testez sur un téléphone physique hors réseau local — ou si vous avez configuré des tunnels Cloudflare.
 
-make mobile
+---
 
-Utiliser ce mode si vous êtes sur un réseau Wi-Fi classique.
+## 🔐 Variables d'environnement
 
-#### Mode Tunnel
+### `.env` (racine — utilisé par l'API et Docker)
 
-make tunnel
+| Variable | Description | Défaut local |
+|---|---|---|
+| `KEYCLOAK_ISSUER` | URL de l'issuer Keycloak | `http://localhost:8080/realms/cook-me` |
+| `KEYCLOAK_CLIENT_ID` | Client ID de l'API | `cook-me-api` |
+| `MINIO_USER` | Identifiant MinIO | `minio` |
+| `MINIO_PASSWORD` | Mot de passe MinIO | `minioSecret` |
+| `MINIO_BUCKET` | Nom du bucket | `cook-me-bucket` |
 
-À utiliser si :
-- vous êtes sur un réseau restreint (école, entreprise…)
-- le mode LAN ne fonctionne pas
+### `apps/mobile/.env`
 
-## **🧪 Scripts disponibles**
+| Variable | Description | Défaut local |
+|---|---|---|
+| `EXPO_PUBLIC_API_URL` | URL de l'API | `http://localhost:3001` |
+| `EXPO_PUBLIC_KEYCLOAK_ISSUER` | URL de l'issuer Keycloak | `http://localhost:8080/realms/cook-me` |
+| `EXPO_PUBLIC_KEYCLOAK_CLIENT_ID` | Client ID mobile | `cook-me-mobile` |
 
-pnpm build
+> 📱 **Test sur mobile physique** : remplacez les URLs `localhost` par vos URLs Cloudflare (ou l'IP locale de votre machine). Pensez à configurer la **Frontend URL** dans Keycloak (Realm Settings → General).
 
-pnpm test
+---
 
-pnpm lint
+## 🧪 Scripts disponibles
 
-pnpm lint:fix
+```bash
+pnpm build       # Build tous les packages (Turbo)
+pnpm typecheck   # Vérification TypeScript
+pnpm test        # Tests (Vitest)
+pnpm lint        # Lint Biome
+pnpm lint:fix    # Lint + auto-fix
+```
 
+---
 
-## **🔁 Workflow Git**
+## 🔁 Workflow Git
 
-### **🌱 Création d’une branche**
+### Créer une branche
 
-Toujours créer une branche à partir de origin/develop :
+Toujours à partir de `origin/develop` :
 
+```bash
 git fetch origin
-git switch -c feature/nom-de-la-branche origin/develop
+git switch -c feature/CM-21-description origin/develop
+```
 
+### Commiter
 
-### **💻 Travail sur sa branche**
-
+```bash
 git add .
-git commit -m "feat: add authentication"
-git push origin feature/nom-de-la-branche
+git commit -S -m "feat(scope): description"
+```
 
-### **🔄 Mise à jour avant PR (Rebase obligatoire)**
+### Avant une PR (rebase obligatoire)
 
-#### Avant toute Pull Request :
-
+```bash
 git fetch origin
-
 git rebase origin/develop
+git push origin feature/CM-21-description
+```
 
-#### Résoudre les conflits si nécessaire :
+### Règles
 
-git add .
+- PR vers `develop` uniquement
+- Rebase obligatoire avant merge
+- Pas de push direct sur `develop`
+- Suppression automatique des branches après merge
 
-git commit -m "fix: resolve merge conflicts"
+### Convention des branches
 
-git push origin feature/nom-de-la-branche
-
-
-Rebase jusqu’à absence totale de conflits.
-
-**📥 Pull Request**
-
-PR vers develop
-
-Rebase obligatoire avant merge
-
-Pas de push direct sur develop
-
-Suppression automatique des branches après merge
-
-**🧾 Convention des branches**
-
+```
 feature/CM-21-auth
-
 fix/CM-22-login-bug
-
 chore/update-deps
+```
 
-## **📝 Conventional Commits (obligatoire)**
+---
 
-### Format :
+## 📝 Conventional Commits (obligatoire)
 
-type(scope): description
+Format : `type(scope): description`
 
-### Exemples :
+Types : `feat`, `fix`, `chore`, `refactor`, `docs`, `test`
 
-feat: add authentication
-fix: correct login bug
-chore: update dependencies
-refactor: improve API structure
+> Les commits doivent être signés GPG (`git commit -S`).
+> Guide : https://formationgit.fr/blog/cles-gpg-et-git-securise-tes-commits-en-5-minutes-chrono
 
-### Types principaux :
-
-feat
-
-fix
-
-chore
-
-refactor
-
-docs
-
-test
-
-## **🔐 Commits signés (GPG)**
-
-Les commits doivent être signés avec une clé GPG.
-
-Guide d’installation :
-
-https://formationgit.fr/blog/cles-gpg-et-git-securise-tes-commits-en-5-minutes-chrono
+---
 
 ## 🧠 Choix techniques
 
-Turborepo
+| Outil | Rôle |
+|---|---|
+| Turborepo | Exécution parallèle + cache intelligent |
+| Biome | Lint + format (config centralisée) |
+| TypeScript | Approche source-first, pas de pré-build des packages |
+| NATS | Messaging entre microservices |
+| Keycloak | SSO — Authorization Code + PKCE |
+| MinIO | Stockage objet (images recettes) |
 
-Exécution parallèle
-
-Cache intelligent
-
-TypeScript
-
-Approche source-first
-
-Pas de pré-build des packages
-
-Biome
-
-Lint + format rapides
-
-Configuration centralisée
-
-## **📌 Résumé**
-
-✔️ Monorepo structuré
-✔️ Dockerisé proprement
-✔️ Workflow Git strict
-✔️ Conventional commits
-✔️ Rebase obligatoire
-✔️ Compatible équipe multi-environnements
-
-
+---
 
 Happy coding 👩‍🍳👨‍🍳

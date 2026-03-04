@@ -2,10 +2,12 @@ import { EventPattern, EventPayload } from '@cook-me/ms-utils'
 import { CreateRecipeDto, RecipeEntityDto } from '@cook-me/schemas'
 import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
 import { Ctx, NatsContext, Payload } from '@nestjs/microservices'
-import { ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { CurrentUser, CurrentUserData } from '../auth/decorators/current-user.decorator'
 import { RecipesService } from './recipes.service'
 import { Recipe } from './schemas/recipe.schema'
 
+@ApiBearerAuth('JWT-auth')
 @ApiTags('recipes')
 @Controller('recipes')
 export class RecipesController {
@@ -26,15 +28,17 @@ export class RecipesController {
   @ApiResponse({
     type: RecipeEntityDto,
   })
-  create(@Body() body: CreateRecipeDto) {
+  create(@Body() body: CreateRecipeDto, @CurrentUser() user: CurrentUserData) {
+    console.log('User creating recipe:', user.userId)
     return this.recipesService.create(body)
   }
 
   @Get()
-  async getRecipes(): Promise<Recipe[]> {
+  async getRecipes(@CurrentUser() user: CurrentUserData): Promise<Recipe[]> {
     try {
+      console.log('User fetching recipes:', user.userId)
       return await this.recipesService.getAllRecipes()
-    } catch (error) {
+    } catch (_error) {
       throw new InternalServerErrorException('Erreur lors de la récupération des recettes')
     }
   }

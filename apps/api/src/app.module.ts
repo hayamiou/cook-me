@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { AuthModule } from './auth/auth.module'
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
 import { IngredientsModule } from './ingredients/ingredients.module'
 import { RecipesModule } from './recipes/recipes.module'
 
@@ -16,12 +18,17 @@ import { RecipesModule } from './recipes/recipes.module'
         limit: 10,
       },
     ]),
+    AuthModule,
     RecipesModule,
     IngredientsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
