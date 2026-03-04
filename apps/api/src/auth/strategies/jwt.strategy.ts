@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      audience: process.env['KEYCLOAK_CLIENT_ID'] || 'cook-me-api',
+      audience: [process.env['KEYCLOAK_CLIENT_ID'] || 'cook-me-api', 'cook-me-mobile'],
       issuer: process.env['KEYCLOAK_ISSUER'] || 'http://localhost:8080/realms/cook-me',
       algorithms: ['RS256'],
       secretOrKeyProvider: passportJwtSecret({

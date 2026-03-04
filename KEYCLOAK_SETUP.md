@@ -156,7 +156,7 @@ Vous devriez voir un JSON avec les endpoints suivants :
 1. Démarrez l'API : `docker-compose up api`
 2. Accédez à : http://localhost:3001/api
 3. Cliquez sur **"Authorize"** (cadenas vert)
-4. Pour obtenir un token de test, utilisez un outil comme Postman ou curl :
+4. Pour obtenir un token de test, vous devez activer temporairement **Direct access grants** sur le client `cook-me-mobile` dans Keycloak (Clients → cook-me-mobile → Settings → Direct access grants : ON), puis utiliser curl :
 
 ```bash
 curl -X POST http://localhost:8080/realms/cook-me/protocol/openid-connect/token \
@@ -166,6 +166,8 @@ curl -X POST http://localhost:8080/realms/cook-me/protocol/openid-connect/token 
   -d "username=testuser" \
   -d "password=password123"
 ```
+
+> ⚠️ **Rappel** : re-désactivez Direct access grants après le test.
 
 5. Copiez le `access_token` retourné
 6. Collez-le dans Swagger et testez une route protégée (ex: GET `/recipes`)

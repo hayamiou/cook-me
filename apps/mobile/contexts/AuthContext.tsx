@@ -33,18 +33,27 @@ const redirectUri = AuthSession.makeRedirectUri({
 const discovery = {
   authorizationEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/auth`,
   tokenEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/token`,
-  revocationEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/logout`,
+  endSessionEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/logout`,
 }
 
 function parseJwt(token: string) {
   try {
     const base64Url = token.split('.')[1]
+    if (!base64Url) return {}
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    // Pad to a multiple of 4 for standard base64 (adds 0–3 '=' chars)
+    const padded = `${base64}===`.slice(0, base64.length + (4 - (base64.length % 4)) % 4)
+    // Pure JS base64 decode — avoids relying on atob (not always available in React Native)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    let bytes = ''
+    for (let i = 0; i < padded.length; i += 4) {
+      const b = (chars.indexOf(padded[i]) << 18) | (chars.indexOf(padded[i + 1]) << 12) |
+        (chars.indexOf(padded[i + 2]) << 6) | chars.indexOf(padded[i + 3])
+      bytes += String.fromCharCode((b >> 16) & 0xff, (b >> 8) & 0xff, b & 0xff)
+    }
+    // Remove padding null bytes and decode as UTF-8
     const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
-        .join(''),
+      bytes.split('').map(c => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`).join(''),
     )
     return JSON.parse(jsonPayload)
   } catch (_e) {
@@ -64,15 +73,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const storedToken = await SecureStore.getItemAsync('accessToken')
         if (storedToken) {
-          setAccessToken(storedToken)
-          setIsAuthenticated(true)
-          // Décoder le JWT pour extraire les infos utilisateur (sans vérification côté mobile)
           const payload = parseJwt(storedToken)
-          setUser({
-            userId: payload.sub,
-            email: payload.email,
-            username: payload.preferred_username,
-          })
+          const nowSec = Math.floor(Date.now() / 1000)
+          if (payload.sub && typeof payload.exp === 'number' && payload.exp > nowSec) {
+            setAccessToken(storedToken)
+            setIsAuthenticated(true)
+            setUser({
+              userId: payload.sub,
+              email: payload.email,
+              username: payload.preferred_username,
+            })
+          } else {
+            // Token missing required claims or expired — clear it
+            await SecureStore.deleteItemAsync('accessToken')
+          }
         }
       } catch (error) {
         console.error('Error loading token:', error)
@@ -177,14 +191,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function base64URLEncode(str: string | Uint8Array): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
     let base64: string
     if (typeof str === 'string') {
       base64 = str
     } else {
-      // Convert Uint8Array to base64 manually for React Native
+      // Convert Uint8Array to base64 without relying on btoa
       const bytes = Array.from(str)
-      const binaryString = bytes.map(byte => String.fromCharCode(byte)).join('')
-      base64 = btoa(binaryString)
+      let result = ''
+      for (let i = 0; i < bytes.length; i += 3) {
+        const b0 = bytes[i]
+        const b1 = i + 1 < bytes.length ? bytes[i + 1] : 0
+        const b2 = i + 2 < bytes.length ? bytes[i + 2] : 0
+        result += chars[b0 >> 2]
+        result += chars[((b0 & 3) << 4) | (b1 >> 4)]
+        result += i + 1 < bytes.length ? chars[((b1 & 15) << 2) | (b2 >> 6)] : '='
+        result += i + 2 < bytes.length ? chars[b2 & 63] : '='
+      }
+      base64 = result
     }
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   }
@@ -207,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context

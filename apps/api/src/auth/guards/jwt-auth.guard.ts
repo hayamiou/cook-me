@@ -10,6 +10,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   override canActivate(context: ExecutionContext) {
+    // Skip JWT auth for non-HTTP contexts (e.g. NATS microservice handlers)
+    if (context.getType() !== 'http') {
+      return true
+    }
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
