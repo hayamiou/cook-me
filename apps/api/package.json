@@ -23,14 +23,15 @@
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.1.9",
     "@nestjs/swagger": "^11.2.6",
-    "mongodb": "^7.1.0",
     "@nestjs/throttler": "^6.4.0",
+    "mongodb": "^7.1.0",
     "mongoose": "^8.20.0",
     "nats": "^2.29.3",
     "nestjs-zod": "^5.1.1",
     "reflect-metadata": "^0.2.2",
     "run-script-webpack-plugin": "^0.2.3",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^",

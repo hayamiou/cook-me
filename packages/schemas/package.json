@@ -2,11 +2,12 @@
   "name": "@cook-me/schemas",
   "version": "0.0.0",
   "private": true,
+  "type": "commonjs",
   "peerDependencies": {
-    "zod": "*",
-    "rxjs": "*",
     "mongoose": "*",
-    "nestjs-zod": "*"
+    "nestjs-zod": "*",
+    "rxjs": "*",
+    "zod": "*"
   },
   "devDependencies": {
     "@cook-me/tsconfig": "workspace:^"
