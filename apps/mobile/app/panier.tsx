@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import {
   FlatList,
@@ -17,38 +16,12 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useCart } from '@/context/CartContext'
+import { DARK, LIGHT } from '@/constants/theme'
+import { usePanierScreen } from '@/hooks/usePanierScreen'
 
-// ─── Palettes ─────────────────────────────────────────────────────────────────
-const LIGHT = {
-  primary: '#F4A623',
-  primaryLight: '#FDEABF',
-  background: '#FAFAF7',
-  surface: '#FFFFFF',
-  text: '#1A1A1A',
-  textMuted: '#8A8A8A',
-  border: '#EFEFEF',
-  danger: '#E05555',
-  checked: '#F4A62318',
-  overlay: 'rgba(0,0,0,0.45)',
-  statusBar: 'dark-content' as const,
-}
+// ─── Données statiques ────────────────────────────────────────────────────────
 
-const DARK = {
-  primary: '#F4A623',
-  primaryLight: '#3D2E10',
-  background: '#111111',
-  surface: '#1E1E1E',
-  text: '#F0F0F0',
-  textMuted: '#888888',
-  border: '#2C2C2C',
-  danger: '#E05555',
-  checked: '#3D2E10',
-  overlay: 'rgba(0,0,0,0.65)',
-  statusBar: 'light-content' as const,
-}
-
-// ─── Unités culinaires (identique à create-recipe) ───────────────────────────
+// Unités culinaires disponibles dans le sélecteur (identique à create-recipe)
 const UNITS = [
   'g',
   'kg',
@@ -68,7 +41,7 @@ const UNITS = [
   'tasse(s)',
 ]
 
-// ─── Sélecteur d'unité (identique à create-recipe) ───────────────────────────
+// ─── Composant UI : sélecteur d'unité inline ─────────────────────────────────
 const UnitPicker = ({
   value,
   onChange,
@@ -76,8 +49,9 @@ const UnitPicker = ({
 }: {
   value: string
   onChange: (u: string) => void
-  C: typeof LIGHT
+  C: typeof LIGHT | typeof DARK
 }) => {
+  // État local d'ouverture du dropdown — reste dans le composant (pur UI)
   const [open, setOpen] = useState(false)
 
   return (
@@ -93,6 +67,7 @@ const UnitPicker = ({
         <Ionicons name="chevron-down" size={16} color={C.textMuted} />
       </TouchableOpacity>
 
+      {/* Dropdown des unités */}
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.dropdownOverlay} onPress={() => setOpen(false)}>
           <View style={[styles.dropdownBox, { backgroundColor: C.surface, borderColor: C.border }]}>
@@ -133,7 +108,7 @@ const UnitPicker = ({
   )
 }
 
-// ─── Modal d'ajout d'article (identique à create-recipe) ─────────────────────
+// ─── Composant UI : modale d'ajout d'article manuel ──────────────────────────
 const AddItemModal = ({
   visible,
   onClose,
@@ -143,8 +118,9 @@ const AddItemModal = ({
   visible: boolean
   onClose: () => void
   onAdd: (name: string, quantity: string, unit: string) => void
-  C: typeof LIGHT
+  C: typeof LIGHT | typeof DARK
 }) => {
+  // États locaux du formulaire — restent dans le composant (pur UI de la modale)
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('1')
   const [unit, setUnit] = useState('')
@@ -166,12 +142,11 @@ const AddItemModal = ({
       >
         <Pressable style={[styles.modalOverlay, { backgroundColor: C.overlay }]} onPress={onClose}>
           <Pressable style={[styles.modalCard, { backgroundColor: C.surface }]}>
-            {/* Poignée */}
+            {/* Poignée de la bottom sheet */}
             <View style={[styles.modalHandle, { backgroundColor: C.border }]} />
 
             <Text style={[styles.modalTitle, { color: C.text }]}>Ajouter un article</Text>
 
-            {/* Nom */}
             <Text style={[styles.modalLabel, { color: C.textMuted }]}>Ingrédient</Text>
             <TextInput
               value={name}
@@ -186,7 +161,6 @@ const AddItemModal = ({
               returnKeyType="next"
             />
 
-            {/* Quantité */}
             <Text style={[styles.modalLabel, { color: C.textMuted }]}>Quantité</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
@@ -217,11 +191,9 @@ const AddItemModal = ({
               </TouchableOpacity>
             </View>
 
-            {/* Unité */}
             <Text style={[styles.modalLabel, { color: C.textMuted }]}>Unité</Text>
             <UnitPicker value={unit} onChange={setUnit} C={C} />
 
-            {/* Actions */}
             <View style={styles.modalActions}>
               <TouchableOpacity
                 onPress={onClose}
@@ -250,24 +222,27 @@ const AddItemModal = ({
   )
 }
 
-// ─── Écran Panier ─────────────────────────────────────────────────────────────
+// ─── Écran panier — responsabilité UI uniquement ──────────────────────────────
+// Toute la logique (état des articles, actions, navigation) est déléguée à usePanierScreen.
 export default function PanierScreen() {
-  const router = useRouter()
   const scheme = useColorScheme()
+  // Palette de couleurs selon le thème système
   const C = scheme === 'dark' ? DARK : LIGHT
 
-  const { items, addItem, toggleCheck, clearDone } = useCart()
+  const {
+    toggleCheck,
+    checkAll,
+    clearDone,
+    pending,
+    done,
+    modalVisible,
+    setModalVisible,
+    handleAdd,
+    goBack,
+  } = usePanierScreen()
 
-  const [modalVisible, setModalVisible] = useState(false)
-
-  const pending = items.filter(i => !i.checked)
-  const done = items.filter(i => i.checked)
-
-  const handleAdd = (name: string, quantity: string, unit: string) => {
-    addItem({ name, quantity, unit })
-  }
-
-  const renderItem = (item: ReturnType<typeof useCart>['items'][0]) => (
+  // Composant UI d'une ligne d'article (inline car dépend de C)
+  const renderItem = (item: (typeof pending)[0]) => (
     <TouchableOpacity
       key={item.id}
       onPress={() => toggleCheck(item.id)}
@@ -311,13 +286,8 @@ export default function PanierScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
       <StatusBar barStyle={C.statusBar} backgroundColor={C.background} />
 
-      {/* ── Header ── */}
       <View style={[styles.header, { backgroundColor: C.background }]}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity onPress={goBack} style={styles.backButton} activeOpacity={0.7}>
           <Ionicons name="chevron-back" size={26} color={C.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: C.text }]}>Mes courses</Text>
@@ -329,16 +299,34 @@ export default function PanierScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ── Section : À acheter ── */}
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: C.text }]}>Courses</Text>
+        {/* Section : articles à acheter */}
+        <View style={styles.sectionHeaderRow}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: C.text }]}>Courses</Text>
+            {pending.length > 0 && (
+              <View style={[styles.countBadge, { backgroundColor: C.primaryLight }]}>
+                <Text style={[styles.countBadgeText, { color: C.primary }]}>{pending.length}</Text>
+              </View>
+            )}
+          </View>
           {pending.length > 0 && (
-            <View style={[styles.countBadge, { backgroundColor: C.primaryLight }]}>
-              <Text style={[styles.countBadgeText, { color: C.primary }]}>{pending.length}</Text>
-            </View>
+            <TouchableOpacity
+              onPress={checkAll}
+              activeOpacity={0.7}
+              style={[styles.checkAllBtn, { borderColor: C.primary }]}
+            >
+              <Ionicons
+                name="checkmark-done-outline"
+                size={14}
+                color={C.primary}
+                style={{ marginRight: 4 }}
+              />
+              <Text style={[styles.checkAllBtnText, { color: C.primary }]}>Tout cocher</Text>
+            </TouchableOpacity>
           )}
         </View>
 
+        {/* État vide */}
         {pending.length === 0 && (
           <View style={[styles.emptyBox, { borderColor: C.border }]}>
             <Ionicons name="checkmark-done-outline" size={28} color={C.primary} />
@@ -366,7 +354,7 @@ export default function PanierScreen() {
           <Text style={[styles.addIngredientText, { color: C.primary }]}>Ajouter un article</Text>
         </TouchableOpacity>
 
-        {/* ── Section : Articles cochés ── */}
+        {/* Section : articles cochés */}
         {done.length > 0 && (
           <>
             <View style={styles.doneSectionHeader}>
@@ -399,7 +387,7 @@ export default function PanierScreen() {
         <View style={{ height: 32 }} />
       </ScrollView>
 
-      {/* Modal ajout d'article */}
+      {/* Modale d'ajout d'article manuel */}
       <AddItemModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -410,7 +398,7 @@ export default function PanierScreen() {
   )
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Styles ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: {
@@ -424,17 +412,25 @@ const styles = StyleSheet.create({
   backButton: { padding: 6 },
   headerTitle: { fontSize: 18, fontWeight: '700' },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 20 },
-
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: '700' },
-  countBadge: {
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  checkAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  checkAllBtnText: { fontSize: 12, fontWeight: '600' },
+  sectionTitle: { fontSize: 18, fontWeight: '700' },
+  countBadge: { borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
   countBadgeText: { fontSize: 12, fontWeight: '700' },
-
-  // Article
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -464,8 +460,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 10,
   },
-
-  // Bouton ajouter
   addIngredientBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -477,8 +471,6 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   addIngredientText: { fontSize: 14, fontWeight: '600' },
-
-  // Section done
   doneSectionHeader: { marginTop: 4 },
   clearBtn: {
     flexDirection: 'row',
@@ -492,8 +484,6 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   clearBtnText: { fontSize: 12, fontWeight: '600' },
-
-  // Empty
   emptyBox: {
     borderWidth: 1,
     borderStyle: 'dashed',
@@ -504,8 +494,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyBoxText: { fontSize: 14, fontWeight: '500' },
-
-  // ── Modal ──
   modalOverlay: { flex: 1, justifyContent: 'flex-end' },
   modalCard: {
     borderTopLeftRadius: 24,
@@ -523,13 +511,7 @@ const styles = StyleSheet.create({
       android: { elevation: 12 },
     }),
   },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
   modalTitle: { fontSize: 17, fontWeight: '700', marginBottom: 20 },
   modalLabel: {
     fontSize: 12,
@@ -546,8 +528,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 16,
   },
-
-  // Quantité
   qtyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   qtyBtn: {
     width: 40,
@@ -566,8 +546,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     height: 40,
   },
-
-  // Unité
   unitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -579,8 +557,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   unitBtnText: { fontSize: 15 },
-
-  // Dropdown
   dropdownOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -621,8 +597,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   dropdownItemText: { fontSize: 15 },
-
-  // Actions modal
   modalActions: { flexDirection: 'row', gap: 12 },
   modalCancelBtn: {
     flex: 1,
@@ -632,11 +606,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalCancelText: { fontSize: 15, fontWeight: '600' },
-  modalAddBtn: {
-    flex: 2,
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
+  modalAddBtn: { flex: 2, paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   modalAddText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 })
