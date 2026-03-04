@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import {
+  Alert,
   Platform,
   StatusBar,
   StyleSheet,
@@ -11,20 +12,34 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { DARK, LIGHT } from '@/constants/theme'
+import { useAuth } from '@/contexts/AuthContext'
 
-const MENU_ITEMS = [
-  { icon: 'settings-outline', label: 'Paramètres' },
-  { icon: 'log-out-outline', label: 'Se déconnecter' },
-] as const
-
-// Écran de profil — responsabilité UI uniquement.
-// L'action de retour arrière est l'unique logique ; pas de hook nécessaire.
 export default function ProfileScreen() {
   const router = useRouter()
+  const { user, signOut } = useAuth()
 
   // Lit le thème système du téléphone
   const scheme = useColorScheme()
   const C = scheme === 'dark' ? DARK : LIGHT
+
+  const handleLogout = () => {
+    Alert.alert('Se déconnecter', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Se déconnecter',
+        style: 'destructive',
+        onPress: async () => {
+          await signOut()
+          router.replace('/login')
+        },
+      },
+    ])
+  }
+
+  const menuItems = [
+    { icon: 'settings-outline' as const, label: 'Paramètres', onPress: () => {} },
+    { icon: 'log-out-outline' as const, label: 'Se déconnecter', onPress: handleLogout },
+  ]
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: C.background }]}>
@@ -50,15 +65,18 @@ export default function ProfileScreen() {
           <Ionicons name="person" size={52} color={C.primary} />
         </View>
 
-        <Text style={[styles.name, { color: C.text }]}>Utilisateur</Text>
-        <Text style={[styles.email, { color: C.textMuted }]}>utilisateur@email.com</Text>
+        <Text style={[styles.name, { color: C.text }]}>{user?.username || 'Utilisateur'}</Text>
+        <Text style={[styles.email, { color: C.textMuted }]}>
+          {user?.email || 'email@example.com'}
+        </Text>
 
         {/* Menu */}
-        {MENU_ITEMS.map(item => (
+        {menuItems.map(item => (
           <TouchableOpacity
             key={item.label}
             style={[styles.menuRow, { backgroundColor: C.surface, borderColor: C.border }]}
             activeOpacity={0.7}
+            onPress={item.onPress}
           >
             <Ionicons name={item.icon} size={22} color={C.primary} />
             <Text style={[styles.menuLabel, { color: C.text }]}>{item.label}</Text>

@@ -10,6 +10,7 @@ import '../global.css'
 import { useColorScheme } from '@/components/useColorScheme'
 import { CartProvider } from '@/context/CartContext'
 import { RecipesProvider } from '@/context/RecipesContext'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export { ErrorBoundary } from 'expo-router'
 
@@ -51,21 +52,23 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme()
 
   return (
-    // ← CartProvider enveloppe tout, les tabs et les autres pages y ont accès
-    <CartProvider>
-      <RecipesProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="panier" options={{ headerShown: false }} />
-            <Stack.Screen name="profil" options={{ headerShown: false }} />
-            <Stack.Screen name="create-recipe" options={{ headerShown: false }} />
-            <Stack.Screen name="recette/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          </Stack>
-        </ThemeProvider>
-      </RecipesProvider>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <RecipesProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="panier" options={{ headerShown: false }} />
+              <Stack.Screen name="profil" options={{ headerShown: false }} />
+              <Stack.Screen name="create-recipe" options={{ headerShown: false }} />
+              <Stack.Screen name="recette/[id]" options={{ headerShown: false }} />
+              <Stack.Screen name="login" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            </Stack>
+          </ThemeProvider>
+        </RecipesProvider>
+      </CartProvider>
+    </AuthProvider>
   )
 }
