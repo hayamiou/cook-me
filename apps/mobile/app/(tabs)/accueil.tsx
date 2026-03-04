@@ -142,7 +142,7 @@ export default function HomeScreen() {
     if (!isLoading && !isAuthenticated) {
       router.replace('/login')
     }
-  }, [isAuthenticated, isLoading, router.replace])
+  }, [isAuthenticated, isLoading, router])
 
   const {
     toggleLike,

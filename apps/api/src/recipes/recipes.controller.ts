@@ -1,6 +1,6 @@
 import { EventPattern, EventPayload } from '@cook-me/ms-utils'
 import { CreateRecipeDto, RecipeEntityDto } from '@cook-me/schemas'
-import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
+import { Body, Controller, Get, InternalServerErrorException, Logger, Post } from '@nestjs/common'
 import { Ctx, NatsContext, Payload } from '@nestjs/microservices'
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { CurrentUser, CurrentUserData } from '../auth/decorators/current-user.decorator'
@@ -11,6 +11,8 @@ import { Recipe } from './schemas/recipe.schema'
 @ApiTags('recipes')
 @Controller('recipes')
 export class RecipesController {
+  private readonly logger = new Logger(RecipesController.name)
+
   constructor(private readonly recipesService: RecipesService) {}
 
   //Réception d'un message du broker : image correctement générée, insertion en base.
@@ -19,7 +21,7 @@ export class RecipesController {
     @Payload() data: EventPayload<'PatchDocument'>,
     @Ctx() context: NatsContext,
   ) {
-    console.log(`Patch du document : ${context.getSubject()}`, data)
+    this.logger.debug(`Patch du document : ${context.getSubject()}`)
     return this.recipesService.updateImageKey(data.callbackPayload.id, data.imageKey)
   }
 
@@ -29,14 +31,14 @@ export class RecipesController {
     type: RecipeEntityDto,
   })
   create(@Body() body: CreateRecipeDto, @CurrentUser() user: CurrentUserData) {
-    console.log('User creating recipe:', user.userId)
+    this.logger.debug(`User creating recipe: ${user.userId}`)
     return this.recipesService.create(body)
   }
 
   @Get()
   async getRecipes(@CurrentUser() user: CurrentUserData): Promise<Recipe[]> {
     try {
-      console.log('User fetching recipes:', user.userId)
+      this.logger.debug(`User fetching recipes: ${user.userId}`)
       return await this.recipesService.getAllRecipes()
     } catch (_error) {
       throw new InternalServerErrorException('Erreur lors de la récupération des recettes')
