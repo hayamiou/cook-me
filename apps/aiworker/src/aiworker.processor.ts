@@ -33,6 +33,7 @@ export class AiworkerProcessor extends WorkerHost {
       prompt: string
       callbackEvent: { name: T; payload: EventPayload<T> }
     }>,
+    // biome-ignore lint/suspicious/noExplicitAny: BullMQ process return type is untyped
   ): Promise<any> {
     const { name } = job
     const { prompt, callbackEvent } = job.data
