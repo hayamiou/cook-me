@@ -1,9 +1,8 @@
 import { EventPattern, EventPayload } from '@cook-me/ms-utils'
-import { CreateRecipeDto, createRecipeDtoSchema } from '@cook-me/schemas'
+import { CreateRecipeDto, RecipeEntityDto } from '@cook-me/schemas'
 import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common'
 import { Ctx, NatsContext, Payload } from '@nestjs/microservices'
-import { ApiTags } from '@nestjs/swagger'
-import { ZodValidationPipe } from '../../pipes/zod-validation-pipe'
+import { ApiResponse, ApiTags } from '@nestjs/swagger'
 import { RecipesService } from './recipes.service'
 import { Recipe } from './schemas/recipe.schema'
 
@@ -24,7 +23,10 @@ export class RecipesController {
 
   //Création d'une recette
   @Post()
-  create(@Body(new ZodValidationPipe(createRecipeDtoSchema)) body: CreateRecipeDto) {
+  @ApiResponse({
+    type: RecipeEntityDto,
+  })
+  create(@Body() body: CreateRecipeDto) {
     return this.recipesService.create(body)
   }
 

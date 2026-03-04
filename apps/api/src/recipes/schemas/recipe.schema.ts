@@ -1,21 +1,30 @@
-import { RecipeEntity, WithObjectId } from '@cook-me/schemas'
+import { RecipeEntity } from '@cook-me/schemas'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Types } from 'mongoose'
+import { string } from 'zod'
 
 export type RecipeDocument = Recipe & Document
 
-/**
- * Enum pour les unités
- */
+//Enum pour les unités
 export enum UnitEnum {
   GRAMMES = 'grammes',
   LITRES = 'litres',
+  CUILLERE_A_SOUPE = 'cuillere_a_soupe',
+  CUILLERE_A_CAFE = 'cuillere_a_cafe',
   SANS = 'sans',
 }
 
-/**
- * Sous-schema Ingredient
- */
+//Enum pour les catégories
+export enum CategoryEnum {
+  POTAGES = 'potages',
+  VEGES = 'végés',
+  VIANDES = 'viandes',
+  POISSONS = 'poissons',
+  PLATS_COMPLETS = 'plats complets',
+  DESSERTS = 'desserts',
+}
+
+//Sous-schema Ingredient
 @Schema()
 export class Ingredient {
   @Prop({ required: true })
@@ -28,11 +37,9 @@ export class Ingredient {
   unit!: UnitEnum
 }
 
-/**
- * Schema principal Recipe
- */
+//Schema principal Recipe
 @Schema({ timestamps: true })
-export class Recipe implements WithObjectId<RecipeEntity> {
+export class Recipe implements RecipeEntity {
   _id!: Types.ObjectId
 
   @Prop({
@@ -45,14 +52,14 @@ export class Recipe implements WithObjectId<RecipeEntity> {
         },
         quantity: {
           type: Number,
-          required: true,
+          required: false,
         },
       },
     ],
     default: [],
   })
   ingredients!: {
-    ingredient: Types.ObjectId | Ingredient
+    ingredient: Types.ObjectId
     quantity: number
   }[]
 
@@ -66,7 +73,20 @@ export class Recipe implements WithObjectId<RecipeEntity> {
   steps!: string
 
   @Prop({ required: false })
-  imageKey!: string
+  imageKey?: string
+
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  isLiked!: boolean
+
+  @Prop({
+    type: String,
+    enum: CategoryEnum,
+    required: true,
+  })
+  category!: CategoryEnum
 }
 
 export const IngredientSchema = SchemaFactory.createForClass(Ingredient)

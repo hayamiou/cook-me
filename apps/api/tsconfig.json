@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@cook-me/schemas": ["../../packages/schemas/src"],
       "@cook-me/shared-utils": ["../../packages/shared-utils/src"]
     }
   },

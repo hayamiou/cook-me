@@ -1,3 +1,4 @@
+import { type CreateRecipeDto } from '@cook-me/schemas'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -9,6 +10,14 @@ export class RecipesRepository {
     @InjectModel(Recipe.name)
     private readonly recipeModel: Model<RecipeDocument>,
   ) {}
+
+  create(data: CreateRecipeDto) {
+    return this.recipeModel.create(data)
+  }
+
+  findAll() {
+    return this.recipeModel.find().exec()
+  }
 
   findAllWithIngredients() {
     return this.recipeModel.find().populate('ingredients.ingredient').exec()
