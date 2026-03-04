@@ -1,4 +1,4 @@
-const path = require('node:path')
+const _path = require('node:path')
 const nodeExternals = require('webpack-node-externals')
 const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin')
 
