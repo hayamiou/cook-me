@@ -18,7 +18,7 @@ interface User {
   username?: string
 }
 
-const AuthContext = createContext<AuthContextData>({} as AuthContextData)
+const AuthContext = createContext<AuthContextData | undefined>(undefined)
 
 const KEYCLOAK_ISSUER =
   process.env.EXPO_PUBLIC_KEYCLOAK_ISSUER || 'http://localhost:8080/realms/cook-me'
