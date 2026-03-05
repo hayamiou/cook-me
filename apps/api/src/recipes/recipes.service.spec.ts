@@ -26,6 +26,10 @@ const mockBrokerClient = {
   emit: vi.fn(),
 }
 
+const mockS3Client = {
+  send: vi.fn(),
+}
+
 const mockRecipesRepository = {
   findAllWithIngredients: vi.fn(),
 }
@@ -39,6 +43,7 @@ describe('RecipesService', () => {
         RecipesService,
         { provide: getModelToken(Recipe.name), useValue: mockRecipeModel },
         { provide: 'BROKER_SERVICE', useValue: mockBrokerClient },
+        { provide: 'S3_CLIENT', useValue: mockS3Client },
         { provide: RecipesRepository, useValue: mockRecipesRepository },
       ],
     }).compile()
