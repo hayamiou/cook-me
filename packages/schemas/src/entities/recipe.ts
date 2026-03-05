@@ -6,7 +6,13 @@ import { objectIdSchema } from '../utils'
    ENUMS
 ========================= */
 
-export const unitEnumSchema = z.enum(['grammes', 'litres', 'sans'])
+export const unitEnumSchema = z.enum([
+  'grammes',
+  'litres',
+  'cuillere_a_soupe',
+  'cuillere_a_cafe',
+  'sans',
+])
 export const categoryEnumSchema = z.enum([
   'potages',
   'végés',
