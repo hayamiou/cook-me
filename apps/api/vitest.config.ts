@@ -18,6 +18,15 @@ export default defineConfig({
       'src/**/*.spec.ts',
       'test/**/*.e2e-spec.ts',
     ],
+    coverage: {
+      exclude: [
+        'src/main.ts',
+        'src/**/*.schema.ts',
+        'src/**/*.entity.ts',
+        'src/**/*.module.ts',
+        '**/*.config.*',
+      ],
+    },
   },
   plugins: [
     // esbuild does not support emitting metadata, nest needs that
