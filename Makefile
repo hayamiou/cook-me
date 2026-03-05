@@ -1,4 +1,4 @@
-.PHONY: help install up up-d build down logs ps mongo redis nats keycloak api mobile tunnel dev clean
+.PHONY: help install up up-d build down logs ps mongo redis nats keycloak api mobile tunnel dev seed clean
 
 help:
 	@echo ""
@@ -11,7 +11,8 @@ help:
 	@echo "  make down       Stop all containers"
 	@echo "  make logs       Follow logs (all services)"
 	@echo "  make ps         List running containers"
-	@echo "  make clean      Stop + remove volumes (DANGER: deletes all data)"
+	@echo "  make clean      Stop + remove volumes (DANGER: deletes all data)
+  make seed       Insert seed data (ingredients + recipes) into MongoDB"
 	@echo ""
 	@echo "  make api        Start API only"
 	@echo "  make keycloak   Start Keycloak + PostgreSQL only"
@@ -84,6 +85,9 @@ dev:
 	@echo "       make mobile      (LAN — same Wi-Fi)"
 	@echo "       make tunnel      (physical device / restricted network)"
 	@echo ""
+
+seed:
+	docker exec -i mongo mongosh CMDB /docker-entrypoint-initdb.d/seed.js
 
 clean:
 	docker compose down -v

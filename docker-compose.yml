@@ -114,6 +114,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/seed.js:ro
 
   redis:
     image: redis:7-alpine
