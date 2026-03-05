@@ -26,4 +26,8 @@ export class RecipesRepository {
   findByCategory(category: CategoryEnum) {
     return this.recipeModel.find({ category }).populate('ingredients.ingredient').exec()
   }
+
+  findByCreator(userId: string) {
+    return this.recipeModel.find({ idCreator: userId }).populate('ingredients.ingredient').exec()
+  }
 }

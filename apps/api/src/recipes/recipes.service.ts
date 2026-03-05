@@ -15,8 +15,13 @@ export class RecipesService {
   ) {}
 
   //Création d'une recette
-  async create(data: CreateRecipeDto) {
-    const recipe = await this.recipeModel.create(data)
+  async create(data: CreateRecipeDto, userId: string) {
+    const dataToCreate: CreateRecipeDto = {
+      ...data,
+      idCreator: userId,
+    }
+
+    const recipe = await this.recipeModel.create(dataToCreate)
 
     //émission au broker
     this.brokerClient.emit('RecipeCreated', recipe).subscribe({
@@ -33,6 +38,10 @@ export class RecipesService {
 
   getAllRecipes() {
     return this.recipesRepository.findAllWithIngredients()
+  }
+
+  getRecipesByCreator(userId: string) {
+    return this.recipesRepository.findByCreator(userId)
   }
 
   async getRecipesByCategory(category: string) {
