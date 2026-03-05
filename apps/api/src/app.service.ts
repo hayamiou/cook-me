@@ -5,7 +5,7 @@ import { Connection } from 'mongoose'
 
 @Injectable()
 export class AppService {
-  static HEALTHCHECK_TIMEOUT_MS = 5000
+  private static readonly HEALTHCHECK_TIMEOUT_MS = 5000
 
   constructor(@InjectConnection() readonly connection: Connection) {}
 

@@ -31,11 +31,26 @@ describe('JwtAuthGuard', () => {
     vi.clearAllMocks()
   })
 
-  const mockContext = (handler = {}, cls = {}) =>
+  const mockRequest = () => ({})
+
+  const mockContext = (handler = {}, cls = {}, request = mockRequest()) =>
     ({
       getHandler: () => handler,
       getClass: () => cls,
+      switchToHttp: () => ({ getRequest: () => request }),
     }) as unknown as ExecutionContext
+
+  it('bypass le JWT quand DISABLE_AUTH=true', () => {
+    process.env['DISABLE_AUTH'] = 'true'
+    const request = mockRequest()
+
+    const result = guard.canActivate(mockContext({}, {}, request))
+
+    expect(result).toBe(true)
+    expect((request as Record<string, unknown>).user).toMatchObject({ userId: 'dev-user' })
+
+    delete process.env['DISABLE_AUTH']
+  })
 
   it('autorise une route publique sans vérifier le JWT', () => {
     mockReflector.getAllAndOverride.mockReturnValue(true)
