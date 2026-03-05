@@ -38,7 +38,7 @@ export class RecipesController {
   })
   create(@Body() body: CreateRecipeDto, @CurrentUser() user: CurrentUserData) {
     console.log('User creating recipe:', user.userId)
-    return this.recipesService.create(body)
+    return this.recipesService.create(body, user.userId)
   }
 
   @Get()
@@ -70,6 +70,18 @@ export class RecipesController {
       }
       throw new InternalServerErrorException(
         'Erreur lors de la récupération des recettes par catégorie',
+      )
+    }
+  }
+
+  @Get('me')
+  async getMyRecipes(@CurrentUser() user: CurrentUserData): Promise<Recipe[]> {
+    try {
+      console.log('User fetching own recipes:', user.userId)
+      return await this.recipesService.getRecipesByCreator(user.userId)
+    } catch (_error) {
+      throw new InternalServerErrorException(
+        'Erreur lors de la récupération des recettes de l’utilisateur',
       )
     }
   }
