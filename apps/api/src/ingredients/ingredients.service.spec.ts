@@ -1,18 +1,41 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { getModelToken } from '@nestjs/mongoose'
+import { Test } from '@nestjs/testing'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { IngredientsService } from './ingredients.service'
+import { Ingredient } from './schemas/ingredient.schema'
+
+const mockIngredients = [
+  { _id: '1', title: 'Farine', unit: 'grammes' },
+  { _id: '2', title: 'Lait', unit: 'litres' },
+]
+
+const mockIngredientModel = {
+  find: vi.fn(),
+}
 
 describe('IngredientsService', () => {
   let service: IngredientsService
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [IngredientsService],
+    const module = await Test.createTestingModule({
+      providers: [
+        IngredientsService,
+        { provide: getModelToken(Ingredient.name), useValue: mockIngredientModel },
+      ],
     }).compile()
 
-    service = module.get<IngredientsService>(IngredientsService)
+    service = module.get(IngredientsService)
+    vi.clearAllMocks()
   })
 
-  it('should be defined', () => {
-    expect(service).toBeDefined()
+  describe('findAll', () => {
+    it('retourne tous les ingrédients', async () => {
+      mockIngredientModel.find.mockReturnValue({ exec: vi.fn().mockResolvedValue(mockIngredients) })
+
+      const result = await service.findAll()
+
+      expect(mockIngredientModel.find).toHaveBeenCalled()
+      expect(result).toEqual(mockIngredients)
+    })
   })
 })
