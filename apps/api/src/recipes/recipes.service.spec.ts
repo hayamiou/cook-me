@@ -54,14 +54,13 @@ describe('RecipesService', () => {
 
       const dto = {
         name: 'Tarte aux pommes',
-        idCreator: 'user-123',
         category: 'dessert',
         ingredients: [],
         steps: [],
       }
-      const result = await service.create(dto as any)
+      const result = await service.create(dto as any, 'user-123')
 
-      expect(mockRecipeModel.create).toHaveBeenCalledWith(dto)
+      expect(mockRecipeModel.create).toHaveBeenCalledWith({ ...dto, idCreator: 'user-123' })
       expect(mockBrokerClient.emit).toHaveBeenCalledWith('RecipeCreated', mockRecipe)
       expect(result).toEqual(mockRecipe)
     })
@@ -74,12 +73,11 @@ describe('RecipesService', () => {
 
       const dto = {
         name: 'Tarte aux pommes',
-        idCreator: 'user-123',
         category: 'dessert',
         ingredients: [],
         steps: [],
       }
-      const result = await service.create(dto as any)
+      const result = await service.create(dto as any, 'user-123')
 
       expect(result).toEqual(mockRecipe)
     })

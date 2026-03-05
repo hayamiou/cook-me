@@ -26,20 +26,19 @@ describe('RecipesController', () => {
   })
 
   describe('create', () => {
-    it('crée une recette avec les données du body', async () => {
+    it('crée une recette avec les données du body et injecte le userId', async () => {
       const dto = {
         name: 'Tarte',
-        idCreator: 'user-123',
         category: 'dessert',
         ingredients: [],
         steps: [],
       }
-      const created = { _id: '1', ...dto }
+      const created = { _id: '1', ...dto, idCreator: mockUser.userId }
       mockRecipesService.create.mockResolvedValue(created)
 
       const result = await controller.create(dto as any, mockUser)
 
-      expect(mockRecipesService.create).toHaveBeenCalledWith(dto)
+      expect(mockRecipesService.create).toHaveBeenCalledWith(dto, mockUser.userId)
       expect(result).toEqual(created)
     })
   })
