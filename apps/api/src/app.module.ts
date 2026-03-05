@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module'
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
 import { IngredientsModule } from './ingredients/ingredients.module'
 import { RecipesModule } from './recipes/recipes.module'
+import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RecipesModule } from './recipes/recipes.module'
     ]),
     AuthModule,
     RecipesModule,
+    UsersModule,
     IngredientsModule,
   ],
   controllers: [AppController],
