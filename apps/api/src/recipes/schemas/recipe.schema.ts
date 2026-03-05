@@ -75,12 +75,6 @@ export class Recipe implements RecipeEntity {
   imageKey?: string
 
   @Prop({
-    type: Boolean,
-    default: false,
-  })
-  isLiked!: boolean
-
-  @Prop({
     type: String,
     enum: CategoryEnum,
     required: true,
