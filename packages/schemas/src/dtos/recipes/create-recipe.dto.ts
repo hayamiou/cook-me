@@ -5,6 +5,7 @@ import { recipeIngredientSchema, recipeSchema } from '../../entities'
 export const createRecipeDtoSchema = recipeSchema
   .omit({
     _id: true,
+    idCreator: true,
     imageKey: true,
     ingredients: true,
   })
