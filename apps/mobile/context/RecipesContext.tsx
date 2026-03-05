@@ -27,7 +27,9 @@ function mapApiRecipe(api: ApiRecipe): Recipe {
     time: '',
     difficulty: '',
     image: api.imageKey
-      ? `${process.env.EXPO_PUBLIC_API_URL}/recipes/${api._id}/image`
+      ? api.imageKey.startsWith('http')
+        ? api.imageKey
+        : `${process.env.EXPO_PUBLIC_API_URL}/recipes/${api._id}/image`
       : FALLBACK_IMAGE,
     liked: api.isLiked,
     description: api.steps ?? '',
