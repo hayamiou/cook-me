@@ -2,7 +2,7 @@ import { type CreateRecipeDto } from '@cook-me/schemas'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { Recipe, RecipeDocument } from './schemas/recipe.schema'
+import { CategoryEnum, Recipe, RecipeDocument } from './schemas/recipe.schema'
 
 @Injectable()
 export class RecipesRepository {
@@ -21,5 +21,9 @@ export class RecipesRepository {
 
   findAllWithIngredients() {
     return this.recipeModel.find().populate('ingredients.ingredient').exec()
+  }
+
+  findByCategory(category: CategoryEnum) {
+    return this.recipeModel.find({ category }).populate('ingredients.ingredient').exec()
   }
 }
