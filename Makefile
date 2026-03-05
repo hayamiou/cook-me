@@ -1,4 +1,4 @@
-.PHONY: help install up up-d build down logs ps mongo redis nats keycloak api mobile tunnel dev seed clean
+.PHONY: help install up up-d build down logs ps mongo redis nats keycloak api mobile tunnel dev seed reset-db clean
 
 help:
 	@echo ""
@@ -12,7 +12,8 @@ help:
 	@echo "  make logs       Follow logs (all services)"
 	@echo "  make ps         List running containers"
 	@echo "  make clean      Stop + remove volumes (DANGER: deletes all data)"
-	@echo "  make seed       Insert seed data (ingredients + recipes) into MongoDB"
+	@echo "  make seed       Clear and re-insert seed data into MongoDB (Keycloak untouched)"
+	@echo "  make reset-db   Wipe and recreate MongoDB volume only (Keycloak untouched)"
 	@echo ""
 	@echo "  make api        Start API only"
 	@echo "  make keycloak   Start Keycloak + PostgreSQL only"
@@ -87,8 +88,15 @@ dev:
 	@echo ""
 
 seed:
+	docker exec -i mongo mongosh CMDB --eval "db.ingredients.deleteMany({}); db.recipes.deleteMany({})"
 	docker cp scripts/mongo-init.js mongo:/tmp/seed.js
 	docker exec -i mongo mongosh CMDB /tmp/seed.js
+
+reset-db:
+	docker compose stop mongo
+	docker volume rm $$(docker volume ls -q | grep mongo-data) 2>/dev/null || true
+	docker compose up -d mongo
+	@echo "⏳ MongoDB redémarre, seed auto via /docker-entrypoint-initdb.d/..."
 
 clean:
 	docker compose down -v
