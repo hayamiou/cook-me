@@ -1,10 +1,10 @@
 import { ClientProxy } from '@cook-me/ms-utils'
 import { CreateRecipeDto } from '@cook-me/schemas'
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { RecipesRepository } from './recipes.repository'
-import { Recipe } from './schemas/recipe.schema'
+import { CategoryEnum, Recipe } from './schemas/recipe.schema'
 
 @Injectable()
 export class RecipesService {
@@ -33,6 +33,16 @@ export class RecipesService {
 
   getAllRecipes() {
     return this.recipesRepository.findAllWithIngredients()
+  }
+
+  async getRecipesByCategory(category: string) {
+    if (!Object.values(CategoryEnum).includes(category as CategoryEnum)) {
+      throw new BadRequestException(
+        `Catégorie invalide. Valeurs autorisées: ${Object.values(CategoryEnum).join(', ')}`,
+      )
+    }
+
+    return this.recipesRepository.findByCategory(category as CategoryEnum)
   }
 
   /**
