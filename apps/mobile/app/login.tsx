@@ -9,7 +9,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       await signIn()
-      router.replace('/(tabs)')
+      router.replace('/accueil')
     } catch (error) {
       console.error('Login failed:', error)
     }

@@ -1,7 +1,29 @@
 import * as AuthSession from 'expo-auth-session'
-import * as Crypto from 'expo-crypto'
 import * as SecureStore from 'expo-secure-store'
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
+import { Platform } from 'react-native'
+
+// SecureStore ne fonctionne pas sur web → fallback localStorage
+const storage = {
+  async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') return localStorage.getItem(key)
+    return SecureStore.getItemAsync(key)
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      localStorage.setItem(key, value)
+      return
+    }
+    await SecureStore.setItemAsync(key, value)
+  },
+  async deleteItem(key: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      localStorage.removeItem(key)
+      return
+    }
+    await SecureStore.deleteItemAsync(key)
+  },
+}
 
 interface AuthContextData {
   isAuthenticated: boolean
@@ -9,6 +31,7 @@ interface AuthContextData {
   accessToken: string | null
   signIn: () => Promise<void>
   signOut: () => Promise<void>
+  handleCallback: (code: string) => Promise<void>
   user: User | null
 }
 
@@ -24,11 +47,12 @@ const KEYCLOAK_ISSUER =
   process.env.EXPO_PUBLIC_KEYCLOAK_ISSUER || 'http://localhost:8080/realms/cook-me'
 const CLIENT_ID = process.env.EXPO_PUBLIC_KEYCLOAK_CLIENT_ID || 'cook-me-mobile'
 
-// Pour Expo Go / développement, utilisez le scheme défini dans app.json
-const redirectUri = AuthSession.makeRedirectUri({
-  scheme: 'mobile',
-  path: 'auth/callback',
-})
+// Sur web, on utilise l'origine courante. Sur natif, le scheme de l'app.
+const redirectUri =
+  Platform.OS === 'web'
+    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://expo.cook-me.club'}/auth/callback`
+    : AuthSession.makeRedirectUri({ scheme: 'mobile', path: 'auth/callback' })
+console.log('[AuthContext] redirectUri:', redirectUri)
 
 const discovery = {
   authorizationEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/auth`,
@@ -52,27 +76,25 @@ function parseJwt(token: string) {
   }
 }
 
+function storeToken(token: string) {
+  const payload = parseJwt(token)
+  return { userId: payload.sub, email: payload.email, username: payload.preferred_username }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [user, setUser] = useState<User | null>(null)
 
-  // Vérifier si un token existe au démarrage
   useEffect(() => {
     async function loadStoredToken() {
       try {
-        const storedToken = await SecureStore.getItemAsync('accessToken')
+        const storedToken = await storage.getItem('accessToken')
         if (storedToken) {
           setAccessToken(storedToken)
           setIsAuthenticated(true)
-          // Décoder le JWT pour extraire les infos utilisateur (sans vérification côté mobile)
-          const payload = parseJwt(storedToken)
-          setUser({
-            userId: payload.sub,
-            email: payload.email,
-            username: payload.preferred_username,
-          })
+          setUser(storeToken(storedToken))
         }
       } catch (error) {
         console.error('Error loading token:', error)
@@ -87,42 +109,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true)
 
-      // Générer code_verifier et code_challenge pour PKCE
-      const codeVerifier = await generateCodeVerifier()
-      const codeChallenge = await generateCodeChallenge(codeVerifier)
-
-      // Lancer l'auth flow
-      const authRequestOptions: AuthSession.AuthRequestConfig = {
+      const authRequest = new AuthSession.AuthRequest({
         clientId: CLIENT_ID,
         redirectUri,
         scopes: ['openid', 'profile', 'email'],
         responseType: AuthSession.ResponseType.Code,
         usePKCE: true,
-        codeChallenge,
-        codeChallengeMethod: AuthSession.CodeChallengeMethod.S256,
+      })
+
+      // makeAuthUrlAsync génère le PKCE interne avant le redirect
+      await authRequest.makeAuthUrlAsync(discovery)
+
+      // Persiste le verifier interne pour la page callback (web)
+      if (Platform.OS === 'web' && authRequest.codeVerifier) {
+        sessionStorage.setItem('pkce_code_verifier', authRequest.codeVerifier)
       }
 
-      const authRequest = new AuthSession.AuthRequest(authRequestOptions)
       const result = await authRequest.promptAsync(discovery)
 
+      // Sur natif, le résultat est disponible ici
       if (result.type === 'success') {
         const { code } = result.params
-
-        // Échanger le code contre un token
-        const tokenResponse = await exchangeCodeForToken(code, codeVerifier)
-
-        if (tokenResponse.access_token) {
-          await SecureStore.setItemAsync('accessToken', tokenResponse.access_token)
-          setAccessToken(tokenResponse.access_token)
-          setIsAuthenticated(true)
-
-          const payload = parseJwt(tokenResponse.access_token)
-          setUser({
-            userId: payload.sub,
-            email: payload.email,
-            username: payload.preferred_username,
-          })
-        }
+        const tokenResponse = await exchangeCodeForToken(code, authRequest.codeVerifier ?? '')
+        await applyToken(tokenResponse)
       }
     } catch (error) {
       console.error('Sign in error:', error)
@@ -131,9 +140,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function handleCallback(code: string) {
+    try {
+      setIsLoading(true)
+      const codeVerifier = sessionStorage.getItem('pkce_code_verifier') ?? ''
+      sessionStorage.removeItem('pkce_code_verifier')
+      console.log('[handleCallback] code:', code, 'verifier length:', codeVerifier.length)
+
+      const tokenResponse = await exchangeCodeForToken(code, codeVerifier)
+      await applyToken(tokenResponse)
+    } catch (error) {
+      console.error('Callback error:', error)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function applyToken(tokenResponse: { access_token?: string }) {
+    if (tokenResponse.access_token) {
+      await storage.setItem('accessToken', tokenResponse.access_token)
+      setAccessToken(tokenResponse.access_token)
+      setIsAuthenticated(true)
+      setUser(storeToken(tokenResponse.access_token))
+    }
+  }
+
   async function signOut() {
     try {
-      await SecureStore.deleteItemAsync('accessToken')
+      await storage.deleteItem('accessToken')
       setAccessToken(null)
       setIsAuthenticated(false)
       setUser(null)
@@ -158,35 +193,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     if (!response.ok) {
-      throw new Error('Token exchange failed')
+      const errorBody = await response.text()
+      console.error('Token exchange failed:', response.status, errorBody)
+      throw new Error(`Token exchange failed: ${response.status}`)
     }
 
     return response.json()
-  }
-
-  async function generateCodeVerifier(): Promise<string> {
-    const randomBytes = Crypto.getRandomBytes(32)
-    return base64URLEncode(randomBytes)
-  }
-
-  async function generateCodeChallenge(verifier: string): Promise<string> {
-    const hash = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, verifier, {
-      encoding: Crypto.CryptoEncoding.BASE64,
-    })
-    return base64URLEncode(hash)
-  }
-
-  function base64URLEncode(str: string | Uint8Array): string {
-    let base64: string
-    if (typeof str === 'string') {
-      base64 = str
-    } else {
-      // Convert Uint8Array to base64 manually for React Native
-      const bytes = Array.from(str)
-      const binaryString = bytes.map(byte => String.fromCharCode(byte)).join('')
-      base64 = btoa(binaryString)
-    }
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
   }
 
   return (
@@ -197,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         accessToken,
         signIn,
         signOut,
+        handleCallback,
         user,
       }}
     >
