@@ -53,8 +53,8 @@ function RootLayoutNav() {
 
   return (
     <AuthProvider>
-      <CartProvider>
-        <RecipesProvider>
+      <RecipesProvider>
+        <CartProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <Stack>
               <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -68,8 +68,8 @@ function RootLayoutNav() {
               <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             </Stack>
           </ThemeProvider>
-        </RecipesProvider>
-      </CartProvider>
+        </CartProvider>
+      </RecipesProvider>
     </AuthProvider>
   )
 }

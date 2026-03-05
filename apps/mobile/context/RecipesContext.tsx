@@ -1,5 +1,6 @@
 import type React from 'react'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 import { INITIAL_RECIPES, type Recipe } from '@/data/recipes'
 import { apiClient } from '@/lib/api-client'
 
@@ -53,6 +54,7 @@ type RecipesContextType = {
 const RecipesContext = createContext<RecipesContextType | null>(null)
 
 export function RecipesProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth()
   const [recipes, setRecipes] = useState<Recipe[]>(INITIAL_RECIPES)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -72,8 +74,8 @@ export function RecipesProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    fetchRecipes()
-  }, [fetchRecipes])
+    if (isAuthenticated) fetchRecipes()
+  }, [isAuthenticated, fetchRecipes])
 
   const toggleLike = useCallback((id: string) => {
     setRecipes(prev =>
