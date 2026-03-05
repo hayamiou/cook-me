@@ -43,7 +43,7 @@ const UNITS = [
 ]
 
 // Catégories de recettes disponibles
-const CATEGORIES = ['Potages', 'Végés', 'Viandes', 'Poissons', 'Pâtes', 'Desserts', 'Petit-déj']
+const CATEGORIES = ['Potages', 'Végés', 'Viandes', 'Poissons', 'Plats complets', 'Desserts']
 
 // ─── Composant UI : sélecteur d'unité inline ─────────────────────────────────
 const UnitPicker = ({
@@ -249,6 +249,8 @@ export default function CreateRecipeScreen() {
     setModalVisible,
     addIngredient,
     removeIngredient,
+    isSubmitting,
+    submitRecipe,
     goBack,
   } = useCreateRecipeScreen()
 
@@ -406,19 +408,25 @@ export default function CreateRecipeScreen() {
 
           <View style={{ height: 40 }} />
 
-          {/* Bouton publier — désactivé tant que le titre est vide */}
+          {/* Bouton publier — désactivé tant que le titre est vide ou en cours d'envoi */}
           <TouchableOpacity
-            style={[styles.submitBtn, { backgroundColor: title ? C.primary : C.primaryLight }]}
-            activeOpacity={title ? 0.85 : 1}
-            disabled={!title}
+            style={[
+              styles.submitBtn,
+              { backgroundColor: title && !isSubmitting ? C.primary : C.primaryLight },
+            ]}
+            activeOpacity={title && !isSubmitting ? 0.85 : 1}
+            disabled={!title || isSubmitting}
+            onPress={submitRecipe}
           >
             <Ionicons
-              name="checkmark-circle-outline"
+              name={isSubmitting ? 'hourglass-outline' : 'checkmark-circle-outline'}
               size={20}
               color="#FFF"
               style={{ marginRight: 8 }}
             />
-            <Text style={styles.submitText}>Publier la recette</Text>
+            <Text style={styles.submitText}>
+              {isSubmitting ? 'Publication…' : 'Publier la recette'}
+            </Text>
           </TouchableOpacity>
 
           <View style={{ height: 40 }} />
