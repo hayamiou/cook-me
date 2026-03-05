@@ -57,7 +57,7 @@ console.log('[AuthContext] redirectUri:', redirectUri)
 const discovery = {
   authorizationEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/auth`,
   tokenEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/token`,
-  revocationEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/logout`,
+  revocationEndpoint: `${KEYCLOAK_ISSUER}/protocol/openid-connect/revoke`,
 }
 
 function parseJwt(token: string) {
@@ -168,12 +168,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signOut() {
     try {
+      // Révocation du token côté Keycloak — invalide la session SSO
+      if (accessToken) {
+        await fetch(discovery.revocationEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ token: accessToken, client_id: CLIENT_ID }).toString(),
+        }).catch(err => console.warn('SSO revocation failed (ignored):', err))
+      }
+    } finally {
+      // Nettoyage local toujours exécuté, même si la révocation échoue
       await storage.deleteItem('accessToken')
       setAccessToken(null)
       setIsAuthenticated(false)
       setUser(null)
-    } catch (error) {
-      console.error('Sign out error:', error)
     }
   }
 
