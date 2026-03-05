@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mockPush = vi.fn()
+const { mockPush } = vi.hoisted(() => ({ mockPush: vi.fn() }))
 
 vi.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
