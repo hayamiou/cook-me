@@ -472,7 +472,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'végés',
     isLiked: false,
-    imageKey: 'https://images.unsplash.com/photo-1601024445121-e5b82f020549?w=1200',
+    imageKey: 'https://images.unsplash.com/photo-1639667870348-2de534c0c5a4?w=1200',
     steps:
       "1. Préchauffer le four à 180°C. Frotter le plat avec de l'ail. " +
       '2. Disposer les pommes de terre en fines lamelles, assaisonner, verser la crème et le lait. ' +
@@ -817,7 +817,7 @@ const recipes = [
   {
     name: 'Chili con carne',
     idCreator: SEED_USER,
-    imageKey: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200',
+    imageKey: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1200',
     category: 'plats complets',
     isLiked: false,
     steps:
@@ -864,7 +864,7 @@ const recipes = [
   {
     name: 'Hachis parmentier',
     idCreator: SEED_USER,
-    imageKey: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200',
+    imageKey: 'https://images.unsplash.com/photo-1635321593217-40f7fd1f8a1a?w=1200',
     category: 'plats complets',
     isLiked: false,
     steps:
