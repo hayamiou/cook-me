@@ -349,6 +349,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'potages',
     isLiked: false,
+    imageKey: 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=1200',
     steps:
       "1. Émincer l'oignon et faire revenir dans l'huile d'olive. " +
       '2. Ajouter les carottes en rondelles et le gingembre râpé, couvrir de bouillon. ' +
@@ -367,6 +368,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'potages',
     isLiked: true,
+    imageKey: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200',
     steps:
       '1. Émincer finement les oignons et les faire caraméliser à feu doux dans le beurre 30 min. ' +
       '2. Déglacer au vin blanc, ajouter le bouillon de bœuf. Cuire 20 min. ' +
@@ -385,6 +387,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'potages',
     isLiked: false,
+    imageKey: 'https://images.unsplash.com/photo-1529566652340-2c41a1eb6d19?w=1200',
     steps:
       '1. Mixer tomates, concombre, poivron rouge, ail et pain de mie trempé. ' +
       "2. Ajouter l'huile d'olive et le vinaigre de vin rouge, assaisonner. " +
@@ -404,6 +407,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'potages',
     isLiked: true,
+    imageKey: 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=1200',
     steps:
       '1. Couper le butternut en cubes, rôtir au four 25 min avec huile et herbes de Provence. ' +
       '2. Mixer avec le bouillon et le lait de coco. ' +
@@ -423,6 +427,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'potages',
     isLiked: false,
+    imageKey: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200',
     steps:
       '1. Faire revenir oignon et ail, ajouter les lentilles rincées, le lait de coco et le bouillon. ' +
       '2. Incorporer curry, cumin et curcuma. Cuire 20 min. ' +
@@ -446,6 +451,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'végés',
     isLiked: true,
+    imageKey: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=1200',
     steps:
       "1. Faire revenir l'oignon et les champignons dans le beurre. " +
       '2. Ajouter le riz et nacrer 1 min. Déglacer au vin blanc. ' +
@@ -466,6 +472,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'végés',
     isLiked: false,
+    imageKey: 'https://images.unsplash.com/photo-1601024445121-e5b82f020549?w=1200',
     steps:
       "1. Préchauffer le four à 180°C. Frotter le plat avec de l'ail. " +
       '2. Disposer les pommes de terre en fines lamelles, assaisonner, verser la crème et le lait. ' +
@@ -484,6 +491,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'végés',
     isLiked: false,
+    imageKey: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1200',
     steps:
       '1. Précuire la pâte brisée 10 min. ' +
       '2. Faire revenir les épinards à la poêle, les égoutter. Mélanger œufs, crème, feta. ' +
@@ -502,6 +510,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'végés',
     isLiked: true,
+    imageKey: 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=1200',
     steps:
       '1. Faire revenir oignon et ail avec les épices (curry, cumin, coriandre, garam masala). ' +
       '2. Ajouter tomates concassées, pois chiches et lait de coco. Mijoter 20 min. ' +
@@ -524,6 +533,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'végés',
     isLiked: false,
+    imageKey: 'https://images.unsplash.com/photo-1572453800999-e8d2d1589b7c?w=1200',
     steps:
       '1. Couper en cubes aubergines, courgettes, poivrons et tomates. ' +
       "2. Faire revenir séparément chaque légume dans l'huile d'olive, réserver. " +
@@ -547,6 +557,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'viandes',
     isLiked: false,
+    imageKey: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c3?w=1200',
     steps:
       '1. Préchauffer le four à 200°C. ' +
       '2. Frotter le poulet avec beurre, ail, thym, romarin, sel et poivre. ' +
@@ -566,6 +577,7 @@ const recipes = [
     idCreator: SEED_USER,
     category: 'viandes',
     isLiked: true,
+    imageKey: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=1200',
     steps:
       '1. Faire revenir les lardons et réserver. Saisir le bœuf coupé en cubes. ' +
       '2. Ajouter oignons, carottes, bouquet garni, fariner et couvrir de vin rouge. ' +
@@ -587,6 +599,7 @@ const recipes = [
     name: "Tajine d'agneau aux pruneaux et amandes",
     idCreator: SEED_USER,
     category: 'viandes',
+    imageKey: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200',
     isLiked: false,
     steps:
       "1. Faire dorer l'épaule d'agneau avec oignon et épices (ras el hanout, cannelle, gingembre). " +
@@ -609,6 +622,7 @@ const recipes = [
   {
     name: 'Poulet tikka masala',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=1200',
     category: 'viandes',
     isLiked: true,
     steps:
@@ -632,6 +646,7 @@ const recipes = [
   {
     name: 'Côtes de porc à la moutarde',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=1200',
     category: 'viandes',
     isLiked: false,
     steps:
@@ -653,6 +668,7 @@ const recipes = [
   {
     name: 'Saumon aux haricots verts',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=1200',
     category: 'poissons',
     isLiked: false,
     steps:
@@ -670,6 +686,7 @@ const recipes = [
   {
     name: 'Cabillaud en croûte de parmesan',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1200',
     category: 'poissons',
     isLiked: false,
     steps:
@@ -689,6 +706,7 @@ const recipes = [
   {
     name: 'Crevettes sautées ail beurre',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=1200',
     category: 'poissons',
     isLiked: true,
     steps:
@@ -708,6 +726,7 @@ const recipes = [
   {
     name: 'Moules marinières',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1600803907087-f56d462fd26b?w=1200',
     category: 'poissons',
     isLiked: true,
     steps:
@@ -727,6 +746,7 @@ const recipes = [
   {
     name: 'Thon grillé au sésame et sauce soja',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=1200',
     category: 'poissons',
     isLiked: false,
     steps:
@@ -748,6 +768,7 @@ const recipes = [
   {
     name: 'Lasagnes bolognaise',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=1200',
     category: 'plats complets',
     isLiked: true,
     steps:
@@ -771,6 +792,7 @@ const recipes = [
   {
     name: 'Paëlla valenciana',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=1200',
     category: 'plats complets',
     isLiked: true,
     steps:
@@ -795,6 +817,7 @@ const recipes = [
   {
     name: 'Chili con carne',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200',
     category: 'plats complets',
     isLiked: false,
     steps:
@@ -817,6 +840,7 @@ const recipes = [
   {
     name: 'Pad thaï aux crevettes',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=1200',
     category: 'plats complets',
     isLiked: true,
     steps:
@@ -840,6 +864,7 @@ const recipes = [
   {
     name: 'Hachis parmentier',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200',
     category: 'plats complets',
     isLiked: false,
     steps:
@@ -863,6 +888,7 @@ const recipes = [
   {
     name: 'Tarte tatin aux pommes',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=1200',
     category: 'desserts',
     isLiked: true,
     steps:
@@ -881,6 +907,7 @@ const recipes = [
   {
     name: 'Crème brûlée à la vanille',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=1200',
     category: 'desserts',
     isLiked: true,
     steps:
@@ -898,6 +925,7 @@ const recipes = [
   {
     name: 'Mousse au chocolat noir',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=1200',
     category: 'desserts',
     isLiked: true,
     steps:
@@ -914,6 +942,7 @@ const recipes = [
   {
     name: 'Tiramisu classique',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=1200',
     category: 'desserts',
     isLiked: true,
     steps:
@@ -933,6 +962,7 @@ const recipes = [
   {
     name: 'Crêpes sucrées',
     idCreator: SEED_USER,
+    imageKey: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?w=1200',
     category: 'desserts',
     isLiked: false,
     steps:
