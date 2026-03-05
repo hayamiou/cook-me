@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -116,7 +117,7 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity
-              onPress={onLogin}
+              onPress={() => router.replace('./(tabs)/accueil')}
               activeOpacity={0.85}
               style={[
                 styles.primaryBtn,

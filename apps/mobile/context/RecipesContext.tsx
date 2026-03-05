@@ -6,6 +6,7 @@ type RecipesContextType = {
   recipes: Recipe[]
   toggleLike: (id: string) => void
   getRecipeById: (id: string) => Recipe | undefined
+  addRecipe: (recipe: Recipe) => void
 }
 
 const RecipesContext = createContext<RecipesContextType | null>(null)
@@ -24,9 +25,13 @@ export function RecipesProvider({ children }: { children: React.ReactNode }) {
     [recipes],
   )
 
+  const addRecipe = useCallback((recipe: Recipe) => {
+    setRecipes(prev => [recipe, ...prev])
+  }, [])
+
   const value = useMemo(
-    () => ({ recipes, toggleLike, getRecipeById }),
-    [recipes, toggleLike, getRecipeById],
+    () => ({ recipes, toggleLike, getRecipeById, addRecipe }),
+    [recipes, toggleLike, getRecipeById, addRecipe],
   )
 
   return <RecipesContext.Provider value={value}>{children}</RecipesContext.Provider>

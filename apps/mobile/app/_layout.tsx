@@ -51,7 +51,6 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme()
 
   return (
-    // ← CartProvider enveloppe tout, les tabs et les autres pages y ont accès
     <CartProvider>
       <RecipesProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -62,6 +61,7 @@ function RootLayoutNav() {
             <Stack.Screen name="profil" options={{ headerShown: false }} />
             <Stack.Screen name="create-recipe" options={{ headerShown: false }} />
             <Stack.Screen name="recette/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
           </Stack>
         </ThemeProvider>

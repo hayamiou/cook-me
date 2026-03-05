@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import { useEffect } from 'react'
 import {
   FlatList,
   Image,
@@ -90,7 +92,9 @@ const RecipeCard = ({
       </Text>
 
       <View style={[styles.recipeImageWrapper, { backgroundColor: C.border }]}>
-        <Image source={{ uri: item.image }} style={styles.recipeImage} resizeMode="cover" />
+        {!!item.image && (
+          <Image source={{ uri: item.image }} style={styles.recipeImage} resizeMode="cover" />
+        )}
 
         <TouchableOpacity onPress={onToggleLike} activeOpacity={0.8} style={styles.likeButton}>
           <Ionicons
@@ -106,8 +110,6 @@ const RecipeCard = ({
               <Ionicons name="time-outline" size={13} color="#FFFFFF" />
               <Text style={styles.recipeMetaText}>{item.time}</Text>
             </View>
-            <View style={styles.recipeMetaDot} />
-            <Text style={styles.recipeMetaText}>{item.difficulty}</Text>
             <View style={styles.recipeMetaDot} />
             <Text style={styles.recipeMetaText}>{item.ingredients.length} ingr.</Text>
           </View>
@@ -129,6 +131,7 @@ const RecipeCard = ({
 // Toute la logique (filtrage, panier, navigation) est déléguée à useHomeScreen.
 export default function HomeScreen() {
   const scheme = useColorScheme()
+  const router = useRouter()
   // Palette de couleurs selon le thème système
   const C = scheme === 'dark' ? DARK : LIGHT
 

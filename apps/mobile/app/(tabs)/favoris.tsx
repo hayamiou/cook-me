@@ -41,7 +41,9 @@ const FavoriteRecipeCard = ({
       </Text>
 
       <View style={[styles.recipeImageWrapper, { backgroundColor: C.border }]}>
-        <Image source={{ uri: item.image }} style={styles.recipeImage} resizeMode="cover" />
+        {!!item.image && (
+          <Image source={{ uri: item.image }} style={styles.recipeImage} resizeMode="cover" />
+        )}
 
         <TouchableOpacity onPress={onToggleLike} activeOpacity={0.8} style={styles.likeButton}>
           <Ionicons name="heart" size={22} color={C.heart} />
@@ -53,8 +55,6 @@ const FavoriteRecipeCard = ({
               <Ionicons name="time-outline" size={13} color="#FFFFFF" />
               <Text style={styles.recipeMetaText}>{item.time}</Text>
             </View>
-            <View style={styles.recipeMetaDot} />
-            <Text style={styles.recipeMetaText}>{item.difficulty}</Text>
             <View style={styles.recipeMetaDot} />
             <Text style={styles.recipeMetaText}>{item.ingredients.length} ingr.</Text>
           </View>

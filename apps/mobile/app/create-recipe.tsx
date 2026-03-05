@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
 import {
-  FlatList,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -16,101 +15,17 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import type { PredefinedIngredient } from '@/constants/ingredients'
+import { PREDEFINED_INGREDIENTS } from '@/constants/ingredients'
 import { DARK, LIGHT } from '@/constants/theme'
 import type { Ingredient } from '@/hooks/useCreateRecipeScreen'
 import { useCreateRecipeScreen } from '@/hooks/useCreateRecipeScreen'
 
-// ─── Données statiques ────────────────────────────────────────────────────────
-
-// Unités culinaires disponibles dans le sélecteur
-const UNITS = [
-  'g',
-  'kg',
-  'ml',
-  'cl',
-  'l',
-  'c. à café',
-  'c. à soupe',
-  'pincée',
-  'pièce(s)',
-  'tranche(s)',
-  'gousse(s)',
-  'feuille(s)',
-  'brin(s)',
-  'sachet(s)',
-  'verre(s)',
-  'tasse(s)',
-]
+//DEMO : url ngrok
+const API_URL = 'https://upstanding-obviously-librada.ngrok-free.dev'
 
 // Catégories de recettes disponibles
 const CATEGORIES = ['Potages', 'Végés', 'Viandes', 'Poissons', 'Pâtes', 'Desserts', 'Petit-déj']
-
-// ─── Composant UI : sélecteur d'unité inline ─────────────────────────────────
-const UnitPicker = ({
-  value,
-  onChange,
-  C,
-}: {
-  value: string
-  onChange: (u: string) => void
-  C: typeof LIGHT | typeof DARK
-}) => {
-  // État local d'ouverture du dropdown — reste dans le composant (pur UI)
-  const [open, setOpen] = useState(false)
-
-  return (
-    <View>
-      <TouchableOpacity
-        onPress={() => setOpen(true)}
-        activeOpacity={0.8}
-        style={[styles.unitBtn, { backgroundColor: C.surface, borderColor: C.border }]}
-      >
-        <Text style={[styles.unitBtnText, { color: value ? C.text : C.textMuted }]}>
-          {value || 'Unité'}
-        </Text>
-        <Ionicons name="chevron-down" size={16} color={C.textMuted} />
-      </TouchableOpacity>
-
-      {/* Dropdown des unités */}
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.dropdownOverlay} onPress={() => setOpen(false)}>
-          <View style={[styles.dropdownBox, { backgroundColor: C.surface, borderColor: C.border }]}>
-            <Text style={[styles.dropdownTitle, { color: C.textMuted }]}>Choisir une unité</Text>
-            <FlatList
-              data={UNITS}
-              keyExtractor={u => u}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => {
-                    onChange(item)
-                    setOpen(false)
-                  }}
-                  style={[
-                    styles.dropdownItem,
-                    { borderBottomColor: C.border },
-                    value === item && { backgroundColor: C.primaryLight },
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.dropdownItemText,
-                      { color: C.text },
-                      value === item && { color: C.primary, fontWeight: '700' },
-                    ]}
-                  >
-                    {item}
-                  </Text>
-                  {value === item && <Ionicons name="checkmark" size={16} color={C.primary} />}
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </Pressable>
-      </Modal>
-    </View>
-  )
-}
 
 // ─── Composant UI : modale d'ajout d'ingrédient ──────────────────────────────
 const IngredientModal = ({
@@ -124,28 +39,48 @@ const IngredientModal = ({
   onAdd: (ing: Omit<Ingredient, 'id'>) => void
   C: typeof LIGHT | typeof DARK
 }) => {
-  // États locaux du formulaire — restent dans le composant (pur UI de la modale)
-  const [name, setName] = useState('')
+  const [search, setSearch] = useState('')
+  const [selected, setSelected] = useState<PredefinedIngredient | null>(null)
   const [quantity, setQuantity] = useState('1')
-  const [unit, setUnit] = useState('')
+
+  const suggestions =
+    search.length > 0
+      ? PREDEFINED_INGREDIENTS.filter(i =>
+          i.name.toLowerCase().includes(search.toLowerCase()),
+        ).slice(0, 8)
+      : []
+
+  const handleSelect = (ing: PredefinedIngredient) => {
+    setSelected(ing)
+    setSearch('')
+  }
 
   const handleAdd = () => {
-    if (!name.trim()) return
-    onAdd({ name: name.trim(), quantity, unit })
-    // Réinitialise le formulaire après ajout
-    setName('')
+    if (!selected) return
+    onAdd({ name: selected.name, quantity, unit: selected.unit })
+    setSearch('')
+    setSelected(null)
     setQuantity('1')
-    setUnit('')
+    onClose()
+  }
+
+  const handleClose = () => {
+    setSearch('')
+    setSelected(null)
+    setQuantity('1')
     onClose()
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        <Pressable style={[styles.modalOverlay, { backgroundColor: C.overlay }]} onPress={onClose}>
+        <Pressable
+          style={[styles.modalOverlay, { backgroundColor: C.overlay }]}
+          onPress={handleClose}
+        >
           {/* stopPropagation : évite que le tap dans la carte ferme le modal */}
           <Pressable style={[styles.modalCard, { backgroundColor: C.surface }]}>
             {/* Poignée de la bottom sheet */}
@@ -154,20 +89,70 @@ const IngredientModal = ({
             <Text style={[styles.modalTitle, { color: C.text }]}>Ajouter un ingrédient</Text>
 
             <Text style={[styles.modalLabel, { color: C.textMuted }]}>Ingrédient</Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Ex : farine, tomates…"
-              placeholderTextColor={C.textMuted}
-              style={[
-                styles.modalInput,
-                { backgroundColor: C.background, borderColor: C.border, color: C.text },
-              ]}
-              autoFocus
-              returnKeyType="next"
-            />
 
-            <Text style={[styles.modalLabel, { color: C.textMuted }]}>Quantité</Text>
+            {selected ? (
+              // Ingrédient sélectionné — affiche le nom avec bouton pour effacer
+              <View
+                style={[
+                  styles.selectedChip,
+                  { backgroundColor: C.primaryLight, borderColor: C.primary },
+                ]}
+              >
+                <Text style={[styles.selectedChipText, { color: C.primary }]}>{selected.name}</Text>
+                <TouchableOpacity
+                  onPress={() => setSelected(null)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="close-circle" size={18} color={C.primary} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                {/* Champ de recherche dans les ingrédients prédéfinis */}
+                <TextInput
+                  value={search}
+                  onChangeText={setSearch}
+                  placeholder="Rechercher un ingrédient…"
+                  placeholderTextColor={C.textMuted}
+                  style={[
+                    styles.modalInput,
+                    { backgroundColor: C.background, borderColor: C.border, color: C.text },
+                  ]}
+                  autoFocus
+                  returnKeyType="search"
+                />
+
+                {suggestions.length > 0 && (
+                  <ScrollView
+                    style={[styles.suggestionList, { borderColor: C.border }]}
+                    nestedScrollEnabled
+                    keyboardShouldPersistTaps="handled"
+                  >
+                    {suggestions.map(ing => (
+                      <TouchableOpacity
+                        key={ing.name}
+                        onPress={() => handleSelect(ing)}
+                        style={[styles.suggestionItem, { borderBottomColor: C.border }]}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.suggestionName, { color: C.text }]}>{ing.name}</Text>
+                        <Text style={[styles.suggestionUnit, { color: C.textMuted }]}>
+                          {ing.unit}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
+
+                {search.length > 0 && suggestions.length === 0 && (
+                  <Text style={[styles.noResult, { color: C.textMuted }]}>
+                    Aucun ingrédient trouvé
+                  </Text>
+                )}
+              </>
+            )}
+
+            <Text style={[styles.modalLabel, { color: C.textMuted, marginTop: 16 }]}>Quantité</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => setQuantity(p => String(Math.max(0, parseFloat(p || '0') - 1)))}
@@ -197,12 +182,9 @@ const IngredientModal = ({
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.modalLabel, { color: C.textMuted }]}>Unité</Text>
-            <UnitPicker value={unit} onChange={setUnit} C={C} />
-
             <View style={styles.modalActions}>
               <TouchableOpacity
-                onPress={onClose}
+                onPress={handleClose}
                 style={[styles.modalCancelBtn, { borderColor: C.border }]}
                 activeOpacity={0.7}
               >
@@ -213,10 +195,10 @@ const IngredientModal = ({
                 onPress={handleAdd}
                 style={[
                   styles.modalAddBtn,
-                  { backgroundColor: name.trim() ? C.primary : C.primaryLight },
+                  { backgroundColor: selected ? C.primary : C.primaryLight },
                 ]}
-                activeOpacity={name.trim() ? 0.85 : 1}
-                disabled={!name.trim()}
+                activeOpacity={selected ? 0.85 : 1}
+                disabled={!selected}
               >
                 <Text style={styles.modalAddText}>Ajouter</Text>
               </TouchableOpacity>
@@ -226,6 +208,36 @@ const IngredientModal = ({
       </KeyboardAvoidingView>
     </Modal>
   )
+}
+
+//APPEL API POUR LA DEMO
+const createRecipe = async (title: string) => {
+  try {
+    const response = await fetch(`${API_URL}/recipes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true', // Bypass l'écran d'accueil ngrok
+      },
+      body: JSON.stringify({
+        name: title,
+        idCreator: 'test-demo',
+        category: 'potages',
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      console.log('Erreur API détaillée :', data)
+      return
+    }
+
+    console.log("Succès ! Retour de l'API ok")
+    return data
+  } catch (error) {
+    console.error('Erreur réseau ou serveur :', error)
+  }
 }
 
 // ─── Écran principal — responsabilité UI uniquement ───────────────────────────
@@ -242,6 +254,7 @@ export default function CreateRecipeScreen() {
     setDescription,
     time,
     setTime,
+    setImage,
     category,
     setCategory,
     ingredients,
@@ -249,6 +262,7 @@ export default function CreateRecipeScreen() {
     setModalVisible,
     addIngredient,
     removeIngredient,
+    publish,
     goBack,
   } = useCreateRecipeScreen()
 
@@ -268,18 +282,6 @@ export default function CreateRecipeScreen() {
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Zone d'ajout de photo */}
-          <TouchableOpacity
-            style={[
-              styles.imagePicker,
-              { backgroundColor: C.primaryLight, borderColor: C.primary },
-            ]}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="camera-outline" size={32} color={C.primary} />
-            <Text style={[styles.imagePickerText, { color: C.primary }]}>Ajouter une photo</Text>
-          </TouchableOpacity>
-
           <Text style={[styles.label, { color: C.text }]}>Nom de la recette *</Text>
           <TextInput
             value={title}
@@ -290,6 +292,13 @@ export default function CreateRecipeScreen() {
               styles.input,
               { backgroundColor: C.surface, borderColor: C.border, color: C.text },
             ]}
+            onBlur={() => {
+              if (title) {
+                createRecipe(title).then(res =>
+                  setImage(`${API_URL}/recipes/storage/cookme/${res._id}.png`),
+                )
+              }
+            }}
           />
 
           <Text style={[styles.label, { color: C.text }]}>Description</Text>
@@ -308,12 +317,13 @@ export default function CreateRecipeScreen() {
             textAlignVertical="top"
           />
 
-          <Text style={[styles.label, { color: C.text }]}>Temps de préparation</Text>
+          <Text style={[styles.label, { color: C.text }]}>Temps de préparation (min)</Text>
           <TextInput
             value={time}
-            onChangeText={setTime}
-            placeholder="Ex : 30 min"
+            onChangeText={v => setTime(v.replace(/[^0-9]/g, ''))}
+            placeholder="Ex : 90"
             placeholderTextColor={C.textMuted}
+            keyboardType="number-pad"
             style={[
               styles.input,
               { backgroundColor: C.surface, borderColor: C.border, color: C.text },
@@ -411,6 +421,7 @@ export default function CreateRecipeScreen() {
             style={[styles.submitBtn, { backgroundColor: title ? C.primary : C.primaryLight }]}
             activeOpacity={title ? 0.85 : 1}
             disabled={!title}
+            onPress={publish}
           >
             <Ionicons
               name="checkmark-circle-outline"
@@ -450,17 +461,6 @@ const styles = StyleSheet.create({
   backButton: { padding: 6 },
   headerTitle: { fontSize: 18, fontWeight: '700' },
   content: { paddingHorizontal: 20, paddingTop: 8 },
-  imagePicker: {
-    height: 160,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    gap: 10,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-  },
-  imagePickerText: { fontSize: 14, fontWeight: '600' },
   label: { fontSize: 14, fontWeight: '600', marginBottom: 8 },
   input: {
     borderRadius: 12,
@@ -542,8 +542,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: Platform.OS === 'ios' ? 12 : 9,
     fontSize: 15,
-    marginBottom: 16,
+    marginBottom: 4,
   },
+  suggestionList: {
+    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 4,
+    overflow: 'hidden',
+    maxHeight: 200,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  suggestionName: { fontSize: 15 },
+  suggestionUnit: { fontSize: 12 },
+  noResult: { fontSize: 13, textAlign: 'center', paddingVertical: 8, marginBottom: 4 },
+  selectedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    marginBottom: 4,
+  },
+  selectedChipText: { fontSize: 15, fontWeight: '600' },
   qtyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   qtyBtn: {
     width: 40,
@@ -562,57 +591,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     height: 40,
   },
-  unitBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 10,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 9,
-    marginBottom: 24,
-  },
-  unitBtnText: { fontSize: 15 },
-  dropdownOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    padding: 24,
-  },
-  dropdownBox: {
-    width: '100%',
-    maxHeight: 340,
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 10,
-      },
-      android: { elevation: 8 },
-    }),
-  },
-  dropdownTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    padding: 14,
-    paddingBottom: 8,
-  },
-  dropdownItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  dropdownItemText: { fontSize: 15 },
   modalActions: { flexDirection: 'row', gap: 12 },
   modalCancelBtn: {
     flex: 1,

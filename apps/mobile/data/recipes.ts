@@ -5,8 +5,7 @@ export type Recipe = {
   title: string
   category: string
   time: string
-  difficulty: string
-  image: string
+  image?: string
   liked: boolean
   ingredients: Ingredient[]
   description: string
@@ -18,7 +17,6 @@ export const INITIAL_RECIPES: Recipe[] = [
     title: 'Saumon aux haricots verts',
     category: 'Poissons',
     time: '25 min',
-    difficulty: 'Facile',
     image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=1200',
     liked: false,
     ingredients: [
@@ -37,7 +35,6 @@ export const INITIAL_RECIPES: Recipe[] = [
     title: 'Veloute de carottes',
     category: 'Potages',
     time: '30 min',
-    difficulty: 'Facile',
     image: 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=1200',
     liked: false,
     ingredients: [
@@ -56,7 +53,6 @@ export const INITIAL_RECIPES: Recipe[] = [
     title: 'Risotto aux champignons',
     category: 'Végés',
     time: '40 min',
-    difficulty: 'Moyen',
     image: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=1200',
     liked: true,
     ingredients: [
@@ -76,7 +72,6 @@ export const INITIAL_RECIPES: Recipe[] = [
     title: 'Poulet roti aux herbes',
     category: 'Viandes',
     time: '1h10',
-    difficulty: 'Facile',
     image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c3?w=1200',
     liked: false,
     ingredients: [

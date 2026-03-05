@@ -82,7 +82,9 @@ export default function RecipeDetailsScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Image source={{ uri: recipe.image }} style={styles.cover} resizeMode="cover" />
+        {!!recipe.image && (
+          <Image source={{ uri: recipe.image }} style={styles.cover} resizeMode="cover" />
+        )}
 
         <View style={styles.timeRow}>
           <Ionicons name="time-outline" size={18} color={C.textMuted} />
