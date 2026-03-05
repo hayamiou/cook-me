@@ -1,11 +1,15 @@
 import { createZodDto } from 'nestjs-zod'
-import type { z } from 'zod'
-import { recipeSchema } from '../../entities'
+import { z } from 'zod'
+import { recipeIngredientSchema, recipeSchema } from '../../entities'
 
 export const createRecipeDtoSchema = recipeSchema
   .omit({
     _id: true,
     imageKey: true,
+    ingredients: true,
+  })
+  .extend({
+    ingredients: z.array(recipeIngredientSchema).optional().default([]),
   })
   .strict()
 
