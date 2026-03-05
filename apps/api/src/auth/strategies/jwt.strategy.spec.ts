@@ -1,5 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { JwtStrategy } from './jwt.strategy'
 
 // On instancie directement sans NestJS pour tester validate()
