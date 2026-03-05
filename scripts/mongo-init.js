@@ -7,7 +7,7 @@
 const cmdb = db.getSiblingDB('CMDB')
 
 // ─── Idempotence : ne re-seede pas si des données existent déjà ───────────────
-if (cmcmdb.ingredients.countDocuments() > 0) {
+if (cmdb.ingredients.countDocuments() > 0) {
   print('✓ Seed déjà effectué — base non vide, on passe.')
   quit(0)
 }
