@@ -52,10 +52,6 @@ export const recipeSchema = z.object({
   name: z.string().trim().min(1, 'name is required'),
   idCreator: z.string(),
   steps: z.string().optional(),
-
-  // Pas de .default() ici → isLiked: boolean (requis), compatible avec la classe Mongoose
-  isLiked: z.boolean(),
-
   category: categoryEnumSchema,
   imageKey: z.string().trim().optional(),
 

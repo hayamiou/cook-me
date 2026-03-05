@@ -6,7 +6,6 @@ export const createRecipeDtoSchema = recipeSchema
   .omit({
     _id: true,
     imageKey: true,
-    isLiked: true,
   })
   .strict()
 
