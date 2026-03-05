@@ -6,11 +6,14 @@ import {
   Get,
   HttpException,
   InternalServerErrorException,
+  NotFoundException,
   Param,
   Post,
+  Res,
 } from '@nestjs/common'
 import { Ctx, NatsContext, Payload } from '@nestjs/microservices'
 import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
+import type { Response } from 'express'
 import { CurrentUser, CurrentUserData } from '../auth/decorators/current-user.decorator'
 import { RecipesService } from './recipes.service'
 import { CategoryEnum, Recipe } from './schemas/recipe.schema'
@@ -71,6 +74,18 @@ export class RecipesController {
       throw new InternalServerErrorException(
         'Erreur lors de la récupération des recettes par catégorie',
       )
+    }
+  }
+
+  @Get(':id/image')
+  async getImage(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const { stream, contentType } = await this.recipesService.getImage(id)
+      res.setHeader('Content-Type', contentType)
+      stream.pipe(res)
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error
+      throw new InternalServerErrorException("Impossible de récupérer l'image")
     }
   }
 

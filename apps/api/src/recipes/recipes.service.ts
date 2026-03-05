@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream'
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { ClientProxy } from '@cook-me/ms-utils'
 import { CreateRecipeDto } from '@cook-me/schemas'
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
@@ -11,6 +13,7 @@ export class RecipesService {
   constructor(
     @InjectModel(Recipe.name) private recipeModel: Model<Recipe>,
     @Inject('BROKER_SERVICE') private brokerClient: ClientProxy,
+    @Inject('S3_CLIENT') private readonly s3Client: S3Client,
     private readonly recipesRepository: RecipesRepository,
   ) {}
 
@@ -52,6 +55,25 @@ export class RecipesService {
     }
 
     return this.recipesRepository.findByCategory(category as CategoryEnum)
+  }
+
+  /**
+   * Récupère le stream de l'image d'une recette depuis MinIO
+   */
+  async getImage(id: string): Promise<{ stream: Readable; contentType: string }> {
+    const recipe = await this.recipeModel.findById(id).exec()
+    if (!recipe) throw new NotFoundException(`Recette ${id} introuvable`)
+    if (!recipe.imageKey) throw new NotFoundException(`Pas d'image pour la recette ${id}`)
+
+    const command = new GetObjectCommand({
+      Bucket: process.env['MINIO_BUCKET'] ?? 'cook-me-bucket',
+      Key: recipe.imageKey,
+    })
+    const response = await this.s3Client.send(command)
+    return {
+      stream: response.Body as Readable,
+      contentType: response.ContentType ?? 'image/png',
+    }
   }
 
   /**
